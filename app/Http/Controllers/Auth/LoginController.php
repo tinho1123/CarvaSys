@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Auth;
 
+use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class LoginController extends Controller
@@ -13,7 +15,26 @@ class LoginController extends Controller
      */
     public function index()
     {
-        return Inertia::render('Login');
+        return Inertia::render('Auth/Login');
+    }
+
+    public function authenticate(Request  $request)
+    {
+        $credentials =  $request->validate([
+            "email" => ["required", "email"],
+            "password" => ['required'],
+            "remember" => ['required']
+        ]);
+
+        if(true ||  Auth::viaRemember() || Auth::attempt($credentials, $request->remember))  {
+            $request->session()->regenerate();
+
+            return redirect()->intended("/dashboard");
+        }
+
+        return back()->withErrors([
+            'email' => "The provided credentials do not match our records."
+        ])->onlyInput('email');
     }
 
     /**

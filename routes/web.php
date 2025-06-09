@@ -1,7 +1,8 @@
 <?php
 
-use App\Http\Controllers\LoginController;
-use App\Http\Controllers\UsersController;
+use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,7 +17,13 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect('/login');
 });
 
 Route::get('/login', [LoginController::class, 'index']);
+
+Route::post('/login', [LoginController::class, "authenticate"]);
+
+Route::post('/logout', [LogoutController::class, "logout"]);
+
+Route::get("/dashboard", [DashboardController::class, 'index']);
