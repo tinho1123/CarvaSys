@@ -16,7 +16,14 @@ return new class extends Migration
             $table->foreignId('companies_users')->references('id')->on('companies_users')->onUpdate('CASCADE');
             $table->string('name');
             $table->longText('description');
+            $table->decimal('amount', 8, 2, true);
+            $table->decimal('discounts', 8,2,true);
+            $table->enum('active', ['Y', 'N'])->default('Y');
+            $table->decimal('total_amount', 8, 2, true);
             $table->bigInteger('quantity', false, true);
+            $table->string('image')->nullable();
+            $table->enum('isCool', ['Y', 'N']);
+            $table->foreignId('category_id')->references('id')->on('products_categories')->onUpdate('CASCADE');
             $table->timestamps();
         });
     }
