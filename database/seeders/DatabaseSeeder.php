@@ -3,7 +3,14 @@
 namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Enums\ProductCategoryEnum;
+use App\Models\Companies;
+use App\Models\CompaniesUsers;
+use App\Models\ProductsCategories;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,17 +19,34 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        \App\Models\ProductsCategories::factory(11)->create();
-        \App\Models\User::factory(1)->create([
-            "email" => "tinhoefaela@gmail.com",
+        $company = Companies::create([
+            "uuid" => Str::uuid(),
+            "name" => "Carvalho Soluções em TI",
+            "foundation_date" => '1999-09-10'
+        ]);
+        $user = User::create([
+            "uuid" => Str::uuid(),
+            "email" => "carvalho.cwell@gmail.com",
             "name" => "Wellington Carvalho da Cunha Filho",
-            "password" => "123456",
-            "phone_number" => "+5521991751952"
+            "phone_number" => "+5521991751952",
+            "birth_date" => "1999-09-10",
+            'ip_address' => "0.0.0.0",
+            'password' => Hash::make('Well.10091999')
         ]);
-        \App\Models\Companies::factory(1)->create([
-            'name' => "KWR Depósito de bebidas"
+        $companies_users = CompaniesUsers::create([
+            "company_id"  => $company->id,
+            "user_id" => $user->id,
         ]);
-        \App\Models\CompaniesUsers::factory(1)->create();
-        \App\Models\Products::factory(10)->create();
+
+        foreach (ProductCategoryEnum::cases() as $case) {
+            ProductsCategories::updateOrCreate(
+                ['id' => $case->value],
+                ['description' => strtolower(str_replace('_', ' ', $case->name))]
+            );
+        }
+
+        \App\Models\Products::factory(10)->create([
+            "companies_users" => $companies_users->id
+        ]);
     }
 }

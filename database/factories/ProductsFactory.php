@@ -22,7 +22,6 @@ class ProductsFactory extends Factory
             $amount = fake()->randomFloat(2,10, 1000);
             $discounts = fake()->randomFloat(2, 0, $amount);
         return [
-            "companies_users" => CompaniesUsers::factory(),
             "name" => fake()->name(),
             "description" => fake()->streetName(),
             "quantity"  => fake()->randomNumber(),
