@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Enums\ProductCategoryEnum;
-use App\Models\Companies;
+use App\Models\Company;
 use App\Models\CompaniesUsers;
 use App\Models\ProductsCategories;
 use App\Models\User;
@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $company = Companies::create([
+        $company = Company::create([
             "uuid" => Str::uuid(),
             "name" => "Carvalho Soluções em TI",
             "foundation_date" => '1999-09-10'
@@ -34,19 +34,9 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('Well.10091999')
         ]);
         $companies_users = CompaniesUsers::create([
+            'uuid' => Str::uuid(),
             "company_id"  => $company->id,
             "user_id" => $user->id,
-        ]);
-
-        foreach (ProductCategoryEnum::cases() as $case) {
-            ProductsCategories::updateOrCreate(
-                ['id' => $case->value],
-                ['description' => strtolower(str_replace('_', ' ', $case->name))]
-            );
-        }
-
-        \App\Models\Products::factory(10)->create([
-            "companies_users" => $companies_users->id
         ]);
     }
 }

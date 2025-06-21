@@ -13,7 +13,8 @@ return new class extends Migration
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('companies_users')->references('id')->on('companies_users')->onUpdate('CASCADE');
+            $table->uuid()->default(Str::uuid());
+            $table->foreignId('company_id')->references('id')->on('companies')->onUpdate('CASCADE');
             $table->string('name');
             $table->longText('description');
             $table->decimal('amount', 8, 2, true);
