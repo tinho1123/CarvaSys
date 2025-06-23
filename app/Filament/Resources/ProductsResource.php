@@ -27,26 +27,29 @@ class ProductsResource extends Resource
             ->schema([
                 Forms\Components\Hidden::make('company_id'),
                 Forms\Components\FileUpload::make('image')
-                    ->label('imagem')
+                    ->label('Imagem')
                     ->image()
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->directory('products')
+                    ->disk('public')
+                    ->maxSize(2048),
                 Forms\Components\Select::make('category_id')
-                    ->label('categoria')
+                    ->label('Categoria')
                     ->relationship('category', 'description')
                     ->preload()
                     ->searchable()
                     ->required(),
                 Forms\Components\TextInput::make('name')
-                    ->label('nome')
+                    ->label('Nome')
                     ->required()
                     ->maxLength(255)
                     ->columnSpanFull(),
                 Forms\Components\Textarea::make('description')
-                    ->label('descrição')
+                    ->label('Descrição')
                     ->required()
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('amount')
-                    ->label('valor')
+                    ->label('Valor')
                     ->required()
                     ->numeric()
                     ->prefix('R$')
@@ -56,7 +59,7 @@ class ProductsResource extends Resource
                         static::atualizarTotal($set, $get)
                     ),
                 Forms\Components\TextInput::make('discounts')
-                    ->label('descontos')
+                    ->label('Descontos')
                     ->required()
                     ->default(0)
                     ->numeric()
@@ -68,7 +71,7 @@ class ProductsResource extends Resource
                     ),
 
                 Forms\Components\TextInput::make('total_amount')
-                    ->label('valor total')
+                    ->label('Valor total')
                     ->prefix('R$')
                     ->numeric()
                     ->disabled()
@@ -78,18 +81,18 @@ class ProductsResource extends Resource
                         'wire:target' => 'amount,discounts',
                     ]),
                 Forms\Components\TextInput::make('quantity')
-                    ->label('quantidade')
+                    ->label('Quantidade')
                     ->required()
                     ->numeric(),
                 Forms\Components\Toggle::make('isCool')
-                    ->label('gelado?')
+                    ->label('Gelado?')
                     ->onColor('success')
                     ->offColor('danger')
                     ->dehydrateStateUsing(fn(bool $state) => $state ? 'Y' : 'N')
                     ->formatStateUsing(fn($state) => $state === 'Y')
                     ->required(),
                 Forms\Components\Toggle::make('active')
-                    ->label('ativo')
+                    ->label('Ativo')
                     ->required()
                     ->default('Y')
                     ->onColor('success')
@@ -105,23 +108,41 @@ class ProductsResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Nome')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
+                    ->label('Valor')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('discounts')
+                    ->label('Descontos')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('active'),
+                Tables\Columns\ToggleColumn::make('active')
+                    ->label('Ativo')
+                    ->onColor('success')
+                    ->offColor('danger')
+                    ->getStateUsing(fn($record) => $record->active === 'Y')
+                    ->disabled(),
                 Tables\Columns\TextColumn::make('total_amount')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
+                    ->label('Quantidade')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\ImageColumn::make('image'),
-                Tables\Columns\TextColumn::make('isCool'),
-                Tables\Columns\TextColumn::make('category_id')
+                Tables\Columns\ImageColumn::make('image')
+                    ->rounded()
+                    ->label('Imagem')
+                    ->disk('public'),
+                Tables\Columns\ToggleColumn::make('isCool')
+                    ->label('Gelado?')
+                    ->onColor('success')
+                    ->offColor('danger')
+                    ->getStateUsing(fn($record) => $record->active === 'Y')
+                    ->disabled(),
+                Tables\Columns\TextColumn::make('category.description')
+                    ->label('Categoria')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')

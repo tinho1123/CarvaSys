@@ -10,6 +10,11 @@ class CreateProductsCategories extends CreateRecord
 {
     protected static string $resource = ProductsCategoriesResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Criar Categoria';
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['company_id'] = auth()->user()->current_company_id;

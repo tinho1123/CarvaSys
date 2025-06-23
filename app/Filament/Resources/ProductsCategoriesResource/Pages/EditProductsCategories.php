@@ -10,6 +10,11 @@ class EditProductsCategories extends EditRecord
 {
     protected static string $resource = ProductsCategoriesResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Editar Categoria';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

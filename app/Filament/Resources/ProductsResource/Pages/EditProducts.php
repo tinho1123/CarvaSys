@@ -10,6 +10,11 @@ class EditProducts extends EditRecord
 {
     protected static string $resource = ProductsResource::class;
 
+    public function getTitle(): string
+    {
+        return 'Editar Produto';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

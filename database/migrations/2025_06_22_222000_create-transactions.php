@@ -11,19 +11,22 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
+        Schema::create('transactions', function (Blueprint $table) {
             $table->id();
             $table->uuid()->default(Str::uuid());
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
+            $table->foreignId('product_id')->constrained('products')->restrictOnDelete()->restrictOnUpdate();
             $table->string('name');
             $table->longText('description');
             $table->decimal('amount', 8, 2, true);
             $table->decimal('discounts', 8,2,true);
+            $table->decimal('fees', 8, 2, true);
             $table->enum('active', ['Y', 'N'])->default('Y');
             $table->decimal('total_amount', 8, 2, true);
             $table->bigInteger('quantity', false, true);
             $table->string('image')->nullable();
             $table->enum('isCool', ['Y', 'N']);
+            $table->string('category_name');
             $table->foreignId('category_id')->constrained('products_categories')->cascadeOnUpdate();
             $table->timestamps();
         });
@@ -34,6 +37,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        //
     }
 };

@@ -28,7 +28,8 @@ class ProductsCategoriesResource extends Resource
                 Forms\Components\Hidden::make('company_id'),
                 Forms\Components\TextInput::make('description')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    ->label('Descrição'),
             ]);
     }
 
