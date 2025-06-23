@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->uuid()->default(Str::uuid());
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->foreignId('product_id')->constrained('products')->restrictOnDelete()->restrictOnUpdate();
+            $table->foreignId('product_id')->constrained('products')->restrictOnDelete()->cascadeOnUpdate();
+            $table->foreignId('fees_id')->constrained('fees')->restrictOnDelete()->cascadeOnUpdate();
             $table->string('name');
             $table->longText('description');
             $table->decimal('amount', 8, 2, true);
@@ -28,6 +29,8 @@ return new class extends Migration
             $table->enum('isCool', ['Y', 'N']);
             $table->string('category_name');
             $table->foreignId('category_id')->constrained('products_categories')->cascadeOnUpdate();
+            $table->string('client_name');
+            $table->foreignId('client_id')->constrained('clients')->cascadeOnUpdate();
             $table->timestamps();
         });
     }
