@@ -13,4 +13,9 @@ class Fee extends Model
     {
         return $this->hasMany(\App\Models\Transaction::class);
     }
+
+    public function company(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\App\Models\Company::class);
+    }
 }

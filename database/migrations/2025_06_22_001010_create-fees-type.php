@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('fees-type', function(Blueprint $table){
             $table->id();
             $table->uuid();
+            $table->foreignId('company_id')->constrained('companies');
             $table->string('name');
             $table->timestamps();
         });
