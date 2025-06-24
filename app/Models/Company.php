@@ -26,6 +26,11 @@ class Company extends Model
         return $this->belongsToMany(\App\Models\User::class, 'companies_users');
     }
 
+    public function transactions(): HasMany
+    {
+        return  $this->hasMany(\App\Models\Transaction::class);
+    }
+
     public function productsCategories(): HasMany
     {
         return $this->hasMany(\App\Models\ProductsCategories::class);
@@ -33,7 +38,12 @@ class Company extends Model
 
     public function products(): HasMany
     {
-        return $this->hasMany(\App\Models\Products::class);
+        return $this->hasMany(\App\Models\Product::class);
+    }
+
+    public function clients(): HasMany
+    {
+        return $this->hasMany(\App\Models\Client::class);
     }
 
     public function getTenantKeyName(): string

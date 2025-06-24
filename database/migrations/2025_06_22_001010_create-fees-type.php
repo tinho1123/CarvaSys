@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('fees', function (Blueprint $table) {
+        //
+
+        Schema::create('fees-type', function(Blueprint $table){
             $table->id();
-            $table->uuid()->default(Str::uuid());
-            $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->string('description');
-            $table->foreignId('fee_type_id')->constrained('fees-type')->restrictOnDelete()->cascadeOnUpdate();
+            $table->uuid();
+            $table->string('name');
             $table->timestamps();
         });
     }

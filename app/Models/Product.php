@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 
-class Products extends Model
+class Product extends Model
 {
     use HasFactory;
 
@@ -35,7 +35,12 @@ class Products extends Model
 
     public function productsCategories() : \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->hasMany(\App\Models\Products::class);
+        return $this->hasMany(\App\Models\ProductsCategories::class);
+    }
+
+    public function transactions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(\App\Models\Transaction::class);
     }
 
     public function getRouteKeyName(): string
