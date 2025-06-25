@@ -10,10 +10,7 @@ class CreateProductsCategories extends CreateRecord
 {
     protected static string $resource = ProductsCategoriesResource::class;
 
-    public function getTitle(): string
-    {
-        return 'Criar Categoria';
-    }
+    protected static ?string $title = "Criar Categoria";
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {

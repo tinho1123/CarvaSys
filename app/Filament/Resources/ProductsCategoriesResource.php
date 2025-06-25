@@ -21,6 +21,8 @@ class ProductsCategoriesResource extends Resource
 
     protected static ?string $navigationLabel = "Categorias";
 
+    protected static ?string $breadcrumb = "Categorias";
+
     public static function form(Form $form): Form
     {
         return $form

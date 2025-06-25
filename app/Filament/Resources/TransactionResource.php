@@ -21,6 +21,8 @@ class TransactionResource extends Resource
 
     protected static ?string $navigationLabel = "Transações";
 
+    protected static ?string $breadcrumb = "Transações";
+
     public static function form(Form $form): Form
     {
         return $form
