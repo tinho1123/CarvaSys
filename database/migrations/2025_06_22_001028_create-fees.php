@@ -16,7 +16,8 @@ return new class extends Migration
             $table->uuid()->default(Str::uuid());
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
             $table->string('description');
-            $table->foreignId('fee_type_id')->constrained('fees-type')->restrictOnDelete()->cascadeOnUpdate();
+            $table->decimal('amount', 8, 2, true);
+            $table->enum('type', ['percentage', 'fixed']);
             $table->timestamps();
         });
     }

@@ -46,6 +46,11 @@ class Company extends Model
         return $this->hasMany(\App\Models\Client::class);
     }
 
+    public function fees(): HasMany
+    {
+        return $this->hasMany(\App\Models\Fee::class);
+    }
+
     public function getTenantKeyName(): string
     {
         return 'id';

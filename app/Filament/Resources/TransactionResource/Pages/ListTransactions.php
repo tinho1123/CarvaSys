@@ -10,6 +10,11 @@ class ListTransactions extends ListRecords
 {
     protected static string $resource = TransactionResource::class;
 
+    public function getTitle():string
+    {
+        return 'Transações';
+    }
+
     protected function getHeaderActions(): array
     {
         return [

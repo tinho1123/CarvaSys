@@ -27,6 +27,7 @@ class TransactionResource extends Resource
             ->schema([
                 Forms\Components\Hidden::make('company_id'),
                 Forms\Components\Select::make('product_id')
+                    ->label('Produto')
                     ->relationship('product', 'name')
                     ->required()
                     ->preload()
@@ -38,54 +39,61 @@ class TransactionResource extends Resource
                             if ($product) {
                                 $set('name', $product->name);
                                 $set('description', $product->description);
+                                $set('image', $product->image);
                             }
                         }
-                    })
-                ,
+                    })->columnSpanFull(),
+                    Forms\Components\FileUpload::make('image')
+                    ->image()->disabled()->columnSpanFull(),
                 Forms\Components\Select::make('fees_id')
+                    ->label('Taxa')
                     ->relationship('fee', 'description')
                     ->required()
                     ->preload()
-                    ->searchable(),
+                    ->searchable()
+                    ->columnSpanFull(),
                 Forms\Components\TextInput::make('name')
+                    ->label('Nome')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\Textarea::make('description')
+                    ->label('Descrição')
                     ->required()
                     ->columnSpanFull(),
                 Forms\Components\TextInput::make('amount')
+                    ->label('Valor')
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('discounts')
+                    ->label('Descontos')
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('fees')
+                    ->label('Taxa')
                     ->required()
                     ->numeric(),
-                Forms\Components\TextInput::make('active')
-                    ->required(),
                 Forms\Components\TextInput::make('total_amount')
+                    ->label('Valor Total')
                     ->required()
                     ->numeric(),
                 Forms\Components\TextInput::make('quantity')
+                    ->label('Quantidade')
                     ->required()
                     ->numeric(),
-                Forms\Components\FileUpload::make('image')
-                    ->image(),
-                Forms\Components\TextInput::make('isCool')
+
+                Forms\Components\Toggle::make('isCool')
+                    ->label('Gelado?')
                     ->required(),
                 Forms\Components\TextInput::make('category_name')
+                    ->label('Nome da Categoria')
                     ->required()
                     ->maxLength(255),
-                Forms\Components\TextInput::make('category_id')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Hidden::make('category_id')
+                    ->required(),
                 Forms\Components\TextInput::make('client_name')
-                    ->required()
+                    ->label('Nome do Cliente')
                     ->maxLength(255),
-                Forms\Components\TextInput::make('client_id')
-                    ->required()
-                    ->numeric(),
+                Forms\Components\Hidden::make('client_id'),
             ]);
     }
 
@@ -93,53 +101,42 @@ class TransactionResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('uuid')
-                    ->label('UUID')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('company.name')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('product_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('fees_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('name')
+                    ->label('Nome')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('amount')
+                    ->label('Valor')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('discounts')
+                    ->label('Descontos')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('fees')
+                    ->label('Taxa')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\TextColumn::make('active'),
                 Tables\Columns\TextColumn::make('total_amount')
+                    ->label('Valor Total')
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\TextColumn::make('quantity')
+                    ->label('Quantidade')
                     ->numeric()
                     ->sortable(),
-                Tables\Columns\ImageColumn::make('image'),
-                Tables\Columns\TextColumn::make('isCool'),
+                Tables\Columns\ImageColumn::make('image')
+                ->label('Imagem')
+                ->rounded(),
+                Tables\Columns\ToggleColumn::make('isCool')
+                ->label('Gelado?'),
                 Tables\Columns\TextColumn::make('category_name')
+                    ->label('Categoria')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('category_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('client_name')
+                    ->label('Cliente')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('client_id')
-                    ->numeric()
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('created_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('updated_at')
+                    ->label('Criado em')
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

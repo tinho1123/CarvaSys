@@ -10,10 +10,14 @@ class ListFees extends ListRecords
 {
     protected static string $resource = FeeResource::class;
 
+    protected static ?string $title = "Taxas";
+
+    protected static ?string $breadcrumb = 'Listar Taxas';
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()->label('Criar Taxa'),
         ];
     }
 }

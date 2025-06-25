@@ -7,6 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class Fee extends Model
 {
+
+    protected $fillable = [
+        "uuid",
+        "company_id",
+        "description",
+        "amount",
+        "type"
+    ];
+
     use HasFactory;
 
     public function transactions(): \Illuminate\Database\Eloquent\Relations\HasMany
