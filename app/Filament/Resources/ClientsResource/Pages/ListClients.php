@@ -10,15 +10,12 @@ class ListClients extends ListRecords
 {
     protected static string $resource = ClientsResource::class;
 
-    public function getTitle(): string
-    {
-        return "Clientes";
-    }
+    protected static ?string $title = "Clientes";
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()->label("Criar Cliente"),
         ];
     }
 }

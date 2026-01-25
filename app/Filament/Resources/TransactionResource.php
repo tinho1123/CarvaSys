@@ -46,6 +46,8 @@ class TransactionResource extends Resource
                         }
                     })->columnSpanFull(),
                     Forms\Components\FileUpload::make('image')
+                    ->disk('public')
+                    ->directory("products")
                     ->image()->disabled()->columnSpanFull(),
                 Forms\Components\Select::make('fees_id')
                     ->label('Taxa')

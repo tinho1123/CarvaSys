@@ -27,23 +27,23 @@ class FeeResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\Hidden::make('company_id'),
-                Forms\Components\TextInput::make('description')
-                    ->label('Descrição')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('amount')
-                    ->label('Valor')
-                    ->required()
-                    ->numeric()
-                    ->prefix('R$'),
                 Forms\Components\Select::make('type')
                     ->label('Tipos')
                     ->options([
                         'percentage' => 'Porcentagem',
                         'fixed' => 'Fixo'
                     ])
+                    ->required()->columnSpanFull(),
+                Forms\Components\Hidden::make('company_id'),
+                Forms\Components\TextInput::make('description')
+                    ->label('Descrição')
                     ->required()
+                    ->maxLength(255)->columnSpanFull(),
+                Forms\Components\TextInput::make('amount')
+                    ->label('Valor')
+                    ->required()
+                    ->numeric()
+                    ->prefix('R$')->columnSpanFull()
             ]);
     }
 

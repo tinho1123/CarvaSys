@@ -26,10 +26,10 @@ class LoginController extends Controller
             "remember" => ['required']
         ]);
 
-        if(true ||  Auth::viaRemember() || Auth::attempt($credentials, $request->remember))  {
+        if(Auth::viaRemember() || Auth::attempt($credentials, $request->remember))  {
             $request->session()->regenerate();
 
-            return redirect()->intended("/dashboard");
+            return redirect()->to("/dashboard");
         }
 
         return back()->withErrors([

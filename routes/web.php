@@ -16,14 +16,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return redirect('/login');
-});
+Route::get('/', fn () => redirect('/login'));
 
-Route::get('/login', [LoginController::class, 'index']);
+Route::get('/login', [LoginController::class, 'index'])->middleware('guest');
+Route::post('/login', [LoginController::class, 'authenticate'])->middleware('guest');
 
-Route::post('/login', [LoginController::class, "authenticate"]);
+Route::post('/logout', [LogoutController::class, 'logout'])->middleware('auth');
 
-Route::post('/logout', [LogoutController::class, "logout"]);
-
-Route::get("/dashboard", [DashboardController::class, 'index']);
+// Route::get("/dashboard", [DashboardController::class, 'index']);

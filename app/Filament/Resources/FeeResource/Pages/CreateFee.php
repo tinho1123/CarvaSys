@@ -10,6 +10,8 @@ class CreateFee extends CreateRecord
 {
     protected static string $resource = FeeResource::class;
 
+    protected static ?string $title = "Criar Taxa";
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
