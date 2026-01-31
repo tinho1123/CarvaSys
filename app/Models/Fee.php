@@ -7,13 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Fee extends Model
 {
-
     protected $fillable = [
-        "uuid",
-        "company_id",
-        "description",
-        "amount",
-        "type"
+        'uuid',
+        'company_id',
+        'description',
+        'amount',
+        'type',
     ];
 
     use HasFactory;

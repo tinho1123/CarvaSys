@@ -9,13 +9,13 @@ use Filament\Resources\Pages\ListRecords;
 class ListUsers extends ListRecords
 {
     protected static string $resource = UserResource::class;
-    protected static ?string $title = "Usuários";
 
+    protected static ?string $title = 'Usuários';
 
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->label("Criar Usuário"),
+            Actions\CreateAction::make()->label('Criar Usuário'),
         ];
     }
 }

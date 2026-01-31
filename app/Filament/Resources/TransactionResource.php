@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\TransactionResource\Pages;
-use App\Filament\Resources\TransactionResource\RelationManagers;
 use App\Models\Transaction;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class TransactionResource extends Resource
 {
@@ -19,15 +16,14 @@ class TransactionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = "Transações";
+    protected static ?string $navigationLabel = 'Transações';
 
-    protected static ?string $breadcrumb = "Transações";
+    protected static ?string $breadcrumb = 'Transações';
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Hidden::make('company_id'),
                 Forms\Components\Select::make('product_id')
                     ->label('Produto')
                     ->relationship('product', 'name')
@@ -45,9 +41,9 @@ class TransactionResource extends Resource
                             }
                         }
                     })->columnSpanFull(),
-                    Forms\Components\FileUpload::make('image')
+                Forms\Components\FileUpload::make('image')
                     ->disk('public')
-                    ->directory("products")
+                    ->directory('products')
                     ->image()->disabled()->columnSpanFull(),
                 Forms\Components\Select::make('fees_id')
                     ->label('Taxa')
@@ -97,7 +93,12 @@ class TransactionResource extends Resource
                 Forms\Components\TextInput::make('client_name')
                     ->label('Nome do Cliente')
                     ->maxLength(255),
-                Forms\Components\Hidden::make('client_id'),
+                Forms\Components\Select::make('client_id')
+                    ->label('Cliente')
+                    ->relationship('client', 'name')
+                    ->searchable()
+                    ->preload()
+                    ->required(),
             ]);
     }
 
@@ -129,10 +130,10 @@ class TransactionResource extends Resource
                     ->numeric()
                     ->sortable(),
                 Tables\Columns\ImageColumn::make('image')
-                ->label('Imagem')
-                ->rounded(),
+                    ->label('Imagem')
+                    ->rounded(),
                 Tables\Columns\ToggleColumn::make('isCool')
-                ->label('Gelado?'),
+                    ->label('Gelado?'),
                 Tables\Columns\TextColumn::make('category_name')
                     ->label('Categoria')
                     ->searchable(),

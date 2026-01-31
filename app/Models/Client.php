@@ -10,10 +10,10 @@ class Client extends Model
     use HasFactory;
 
     protected $fillable = [
-        "uuid",
-        "company_id",
-        "name",
-        "surname"
+        'uuid',
+        'company_id',
+        'name',
+        'surname',
     ];
 
     public function company(): \Illuminate\Database\Eloquent\Relations\BelongsTo

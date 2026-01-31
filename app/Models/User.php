@@ -14,7 +14,7 @@ use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements FilamentUser, HasTenants
 {
-    use HasApiTokens, HasFactory, Notifiable, HasTenancy;
+    use HasApiTokens, HasFactory, HasTenancy, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -46,7 +46,8 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         'password' => 'hashed',
     ];
 
-    public function company(): BelongsToMany {
+    public function company(): BelongsToMany
+    {
         return $this->belongsToMany(\App\Models\Company::class, 'companies_users');
     }
 

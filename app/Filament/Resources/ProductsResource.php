@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ProductsResource\Pages;
-use App\Filament\Resources\ProductsResource\RelationManagers;
 use App\Models\Product;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ProductsResource extends Resource
 {
@@ -19,7 +16,7 @@ class ProductsResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = "Produtos";
+    protected static ?string $navigationLabel = 'Produtos';
 
     protected static ?string $breadcrumb = 'Produtos';
 
@@ -57,8 +54,7 @@ class ProductsResource extends Resource
                     ->prefix('R$')
                     ->debounce(500)
                     ->afterStateUpdated(
-                        fn($state, callable $set, callable $get) =>
-                        static::atualizarTotal($set, $get)
+                        fn ($state, callable $set, callable $get) => static::atualizarTotal($set, $get)
                     ),
                 Forms\Components\TextInput::make('discounts')
                     ->label('Descontos')
@@ -68,8 +64,7 @@ class ProductsResource extends Resource
                     ->prefix('R$')
                     ->debounce(500)
                     ->afterStateUpdated(
-                        fn($state, callable $set, callable $get) =>
-                        static::atualizarTotal($set, $get)
+                        fn ($state, callable $set, callable $get) => static::atualizarTotal($set, $get)
                     ),
 
                 Forms\Components\TextInput::make('total_amount')
@@ -90,8 +85,8 @@ class ProductsResource extends Resource
                     ->label('Gelado?')
                     ->onColor('success')
                     ->offColor('danger')
-                    ->dehydrateStateUsing(fn(bool $state) => $state ? 'Y' : 'N')
-                    ->formatStateUsing(fn($state) => $state === 'Y')
+                    ->dehydrateStateUsing(fn (bool $state) => $state ? 'Y' : 'N')
+                    ->formatStateUsing(fn ($state) => $state === 'Y')
                     ->required(),
                 Forms\Components\Toggle::make('active')
                     ->label('Ativo')
@@ -99,8 +94,8 @@ class ProductsResource extends Resource
                     ->default('Y')
                     ->onColor('success')
                     ->offColor('danger')
-                    ->formatStateUsing(fn($state) => $state === 'Y')
-                    ->dehydrateStateUsing(fn(bool $state) => $state ? 'Y' : 'N')
+                    ->formatStateUsing(fn ($state) => $state === 'Y')
+                    ->dehydrateStateUsing(fn (bool $state) => $state ? 'Y' : 'N'),
 
             ]);
     }
@@ -124,7 +119,7 @@ class ProductsResource extends Resource
                     ->label('Ativo')
                     ->onColor('success')
                     ->offColor('danger')
-                    ->getStateUsing(fn($record) => $record->active === 'Y')
+                    ->getStateUsing(fn ($record) => $record->active === 'Y')
                     ->disabled(),
                 Tables\Columns\TextColumn::make('total_amount')
                     ->numeric()
@@ -141,7 +136,7 @@ class ProductsResource extends Resource
                     ->label('Gelado?')
                     ->onColor('success')
                     ->offColor('danger')
-                    ->getStateUsing(fn($record) => $record->active === 'Y')
+                    ->getStateUsing(fn ($record) => $record->active === 'Y')
                     ->disabled(),
                 Tables\Columns\TextColumn::make('category.description')
                     ->label('Categoria')

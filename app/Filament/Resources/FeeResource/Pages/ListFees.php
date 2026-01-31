@@ -10,7 +10,7 @@ class ListFees extends ListRecords
 {
     protected static string $resource = FeeResource::class;
 
-    protected static ?string $title = "Taxas";
+    protected static ?string $title = 'Taxas';
 
     protected static ?string $breadcrumb = 'Listar Taxas';
 

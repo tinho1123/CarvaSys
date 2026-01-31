@@ -3,7 +3,6 @@
 namespace App\Filament\Resources\ClientsResource\Pages;
 
 use App\Filament\Resources\ClientsResource;
-use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateClients extends CreateRecord
@@ -18,6 +17,7 @@ class CreateClients extends CreateRecord
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         $data['company_id'] = auth()->user()->current_company_id;
+
         return $data;
     }
 

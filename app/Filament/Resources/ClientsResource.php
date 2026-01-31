@@ -3,23 +3,20 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ClientsResource\Pages;
-use App\Filament\Resources\ClientsResource\RelationManagers;
 use App\Models\Client;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ClientsResource extends Resource
 {
     protected static ?string $model = Client::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
-    protected static ?string $navigationLabel = "Clientes";
 
+    protected static ?string $navigationLabel = 'Clientes';
 
     public static function form(Form $form): Form
     {
@@ -27,9 +24,9 @@ class ClientsResource extends Resource
             ->schema([
                 Forms\Components\Hidden::make('company_id'),
                 Forms\Components\TextInput::make('name')
-                ->label('Nome'),
+                    ->label('Nome'),
                 Forms\Components\TextInput::make('surname')
-                ->label('Apelido')
+                    ->label('Apelido'),
             ]);
     }
 
@@ -38,7 +35,7 @@ class ClientsResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')->label('Nome'),
-                Tables\Columns\TextColumn::make('surname')->label('Apelido')
+                Tables\Columns\TextColumn::make('surname')->label('Apelido'),
             ])
             ->filters([
                 //

@@ -18,7 +18,7 @@ class Company extends Model
      */
     protected $fillable = [
         'name',
-        'foundation_date'
+        'foundation_date',
     ];
 
     public function users(): BelongsToMany
@@ -28,7 +28,7 @@ class Company extends Model
 
     public function transactions(): HasMany
     {
-        return  $this->hasMany(\App\Models\Transaction::class);
+        return $this->hasMany(\App\Models\Transaction::class);
     }
 
     public function productsCategories(): HasMany

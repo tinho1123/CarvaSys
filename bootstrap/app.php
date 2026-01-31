@@ -1,5 +1,4 @@
 <?php
-use App\Http\Middleware\HandleInertiaRequests;
 
 /*
 |--------------------------------------------------------------------------

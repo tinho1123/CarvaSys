@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('name');
             $table->longText('description');
             $table->decimal('amount', 8, 2, true);
-            $table->decimal('discounts', 8,2,true);
+            $table->decimal('discounts', 8, 2, true);
             $table->enum('active', ['Y', 'N'])->default('Y');
             $table->decimal('total_amount', 8, 2, true);
             $table->bigInteger('quantity', false, true);

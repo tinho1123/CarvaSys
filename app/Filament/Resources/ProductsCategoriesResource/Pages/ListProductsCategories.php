@@ -18,7 +18,7 @@ class ListProductsCategories extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make()->label("Criar Categoria"),
+            Actions\CreateAction::make()->label('Criar Categoria'),
         ];
     }
 }

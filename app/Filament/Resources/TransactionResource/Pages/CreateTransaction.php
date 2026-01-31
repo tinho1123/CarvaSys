@@ -9,5 +9,5 @@ class CreateTransaction extends CreateRecord
 {
     protected static string $resource = TransactionResource::class;
 
-    protected static ?string $title = "Criar transação";
+    protected static ?string $title = 'Criar transação';
 }

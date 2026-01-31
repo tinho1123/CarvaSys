@@ -10,11 +10,13 @@ class CompaniesUsers extends Model
 {
     use HasFactory;
 
-    public function user(): BelongsTo {
+    public function user(): BelongsTo
+    {
         return $this->belongsTo(\App\Models\User::class);
     }
 
-    public function company(): BelongsTo {
+    public function company(): BelongsTo
+    {
         return $this->belongsTo(\App\Models\Company::class);
     }
 }

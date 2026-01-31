@@ -18,22 +18,22 @@ class LoginController extends Controller
         return Inertia::render('Auth/Login');
     }
 
-    public function authenticate(Request  $request)
+    public function authenticate(Request $request)
     {
-        $credentials =  $request->validate([
-            "email" => ["required", "email"],
-            "password" => ['required'],
-            "remember" => ['required']
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+            'remember' => ['required'],
         ]);
 
-        if(Auth::viaRemember() || Auth::attempt($credentials, $request->remember))  {
+        if (Auth::viaRemember() || Auth::attempt($credentials, $request->remember)) {
             $request->session()->regenerate();
 
-            return redirect()->to("/dashboard");
+            return redirect()->to('/dashboard');
         }
 
         return back()->withErrors([
-            'email' => "The provided credentials do not match our records."
+            'email' => 'The provided credentials do not match our records.',
         ])->onlyInput('email');
     }
 

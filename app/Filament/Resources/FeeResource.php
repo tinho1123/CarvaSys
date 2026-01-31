@@ -3,15 +3,12 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\FeeResource\Pages;
-use App\Filament\Resources\FeeResource\RelationManagers;
 use App\Models\Fee;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class FeeResource extends Resource
 {
@@ -19,7 +16,7 @@ class FeeResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    protected static ?string $navigationLabel = "Taxas";
+    protected static ?string $navigationLabel = 'Taxas';
 
     protected static ?string $breadcrumb = 'Taxas';
 
@@ -31,7 +28,7 @@ class FeeResource extends Resource
                     ->label('Tipos')
                     ->options([
                         'percentage' => 'Porcentagem',
-                        'fixed' => 'Fixo'
+                        'fixed' => 'Fixo',
                     ])
                     ->required()->columnSpanFull(),
                 Forms\Components\Hidden::make('company_id'),
@@ -43,7 +40,7 @@ class FeeResource extends Resource
                     ->label('Valor')
                     ->required()
                     ->numeric()
-                    ->prefix('R$')->columnSpanFull()
+                    ->prefix('R$')->columnSpanFull(),
             ]);
     }
 
@@ -62,9 +59,9 @@ class FeeResource extends Resource
                     ->label('Tipo')
                     ->options([
                         'percentage' => 'Porcentagem',
-                        'fixed' => 'Fixo'
+                        'fixed' => 'Fixo',
                     ])
-                    ->disabled()
+                    ->disabled(),
             ])
             ->filters([
                 //
