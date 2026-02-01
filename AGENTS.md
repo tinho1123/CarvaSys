@@ -1,124 +1,88 @@
 # AGENTS.md - CarvaSys Development Guidelines
 
-This file contains development guidelines for agentic coding agents working on CarvaSys Laravel project.
+## Project Stack
+- **Backend**: Laravel 10, PHP 8.1+, Filament 3.x, Laravel Sanctum
+- **Frontend**: React 19.x, Inertia.js, Tailwind CSS v4, Vite 6.x
+- **Database**: MySQL/MariaDB with Eloquent ORM
+- **Testing**: PHPUnit 10.x
+- **Dev Env**: Laravel Sail (Docker)
 
-## Project Overview
-CarvaSys is a Laravel 10 application with the following stack:
-- Backend: Laravel 10, PHP 8.4, Filament 3.x
-- Frontend: React 19.x, Inertia.js, Tailwind CSS v4, Vite 6.x
-- Database: MySQL/MariaDB with Eloquent ORM
-- Testing: PHPUnit 10.x
-- Multi-tenancy with Laravel Sanctum
-- Development: Laravel Sail (Docker)
+## Essential Commands
 
-## Build Commands
-
-### Docker/Sail Commands (Recommended)
+### Development Environment
 ```bash
-# Start development environment
-./vendor/bin/sail up -d
+# Sail (Recommended)
+./vendor/bin/sail up -d                    # Start containers
+./vendor/bin/sail down                      # Stop containers
 
-# Stop containers
-./vendor/bin/sail down
-
-# Execute commands inside container
-./vendor/bin/sail php artisan migrate
-./vendor/bin/sail npm run dev
-./vendor/bin/sail composer install
+# Dependencies
+composer install                           # PHP deps
+npm install                               # Node deps
+./vendor/bin/sail composer install        # PHP deps via Sail
+./vendor/bin/sail npm run dev             # Vite dev via Sail
 ```
 
-### PHP/Composer Commands
+### Code Quality & Testing
 ```bash
-# Install dependencies
-composer install
-
-# Run Laravel Pint for code formatting (REQUIRED before commits)
+# Code Formatting (MANDATORY before commits)
 ./vendor/bin/pint
 
-# Generate application key
-php artisan key:generate
+# Testing
+./vendor/bin/phpunit                       # All tests
+./vendor/bin/phpunit tests/Unit           # Unit tests only
+./vendor/bin/phpunit tests/Feature        # Feature tests only
+./vendor/bin/phpunit tests/Unit/UserTest.php  # Single file
+./vendor/bin/phpunit --filter test_method_name  # Single method
+```
 
-# Run database migrations
-php artisan migrate
-
-# Fresh migrate with seeding
-php artisan migrate:fresh --seed
-
-# Start development server
-php artisan serve
-
-# Clear caches
+### Laravel Commands
+```bash
+php artisan migrate                       # Run migrations
+php artisan migrate:fresh --seed          # Fresh with seeding
+php artisan serve                         # Start dev server
 php artisan config:clear && php artisan cache:clear && php artisan route:clear && php artisan view:clear
 ```
 
-### Node/NPM Commands
+### Frontend Commands
 ```bash
-# Install frontend dependencies
-npm install
-
-# Start Vite development server
-npm run dev
-
-# Build for production
-npm run build
-```
-
-### Testing Commands
-```bash
-# Run all tests
-./vendor/bin/phpunit
-
-# Run specific test suite
-./vendor/bin/phpunit tests/Unit
-./vendor/bin/phpunit tests/Feature
-
-# Run single test file
-./vendor/bin/phpunit tests/Unit/ExampleTest.php
-
-# Run with coverage
-./vendor/bin/phpunit --coverage-html coverage
-
-# Run specific test method
-./vendor/bin/phpunit --filter test_method_name
+npm run dev                               # Vite development server
+npm run build                             # Production build
 ```
 
 ## Code Style Guidelines
 
 ### PHP/Laravel Standards
-- **Indentation**: 4 spaces (configured in .editorconfig)
-- **File Encoding**: UTF-8
-- **Line Endings**: LF (Unix style)
-- **Code Formatter**: Laravel Pint (`./vendor/bin/pint`) - MANDATORY before commits
-- **PHP Version**: 8.4+ (Laravel Sail runtime)
+- **Indentation**: 4 spaces (.editorconfig enforced)
+- **Encoding**: UTF-8, LF line endings
+- **Formatter**: Laravel Pint (`./vendor/bin/pint`) - REQUIRED
+- **PHP Version**: 8.1+ (8.4+ in Sail)
 
-#### Import Organization
+#### Import Order (Strict)
 ```php
 <?php
 
 namespace App\Models;
 
-// Framework imports first
+// 1. Framework imports
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Model;
 
-// Package imports
+// 2. Package imports  
 use Laravel\Sanctum\HasApiTokens;
-use Filament\Models\Contracts\FilamentUser;
 
-// App imports last
-use App\Models\Company;
+// 3. App imports
+use App\Models\User;
 ```
 
 #### Naming Conventions
-- **Classes**: PascalCase (User, ProductCategory, TransactionResource)
-- **Methods**: camelCase (getUserData, createTransaction)
-- **Variables**: camelCase ($userData, $transactionId)
-- **Constants**: UPPER_SNAKE_CASE (API_VERSION, MAX_ATTEMPTS)
-- **Database Tables**: snake_case (users, product_categories)
-- **UUID Keys**: All models use `uuid` as route key with `getRouteKeyName()` method
+- Classes: `PascalCase` (User, TransactionResource)
+- Methods: `camelCase` (getUserData, createTransaction) 
+- Variables: `camelCase` ($userData, $transactionId)
+- Constants: `UPPER_SNAKE_CASE` (API_VERSION, MAX_ATTEMPTS)
+- Database tables: `snake_case` (users, transactions)
+- UUID route keys: All models use `uuid` with `getRouteKeyName()`
 
-#### Model Guidelines
+#### Model Structure
 ```php
 <?php
 
@@ -134,9 +98,8 @@ class Transaction extends Model
 
     protected $fillable = [
         'uuid',
-        'company_id',
+        'company_id', 
         'user_id',
-        'client_id', 
         'amount',
         'description',
     ];
@@ -164,39 +127,29 @@ class Transaction extends Model
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\UserResource\Pages;
 use App\Models\User;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
-use Filament\Tables;
-use Filament\Tables\Table;
 
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
     protected static ?string $navigationIcon = 'heroicon-o-users';
-    protected static ?string $navigationLabel = 'Usuários';
 
     public static function form(Form $form): Form
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Forms\Components\TextInput::make('email')
-                    ->required()
-                    ->email()
-                    ->unique(ignoreRecord: true),
-            ]);
+        return $form->schema([
+            Forms\Components\TextInput::make('name')
+                ->required()
+                ->maxLength(255),
+        ]);
     }
 }
 ```
 
 ### JavaScript/React Standards
-- **Framework**: React 19.x with function components and hooks
-- **State**: useState, useReducer for local state
+- **Framework**: React 19.x function components with hooks
+- **State**: useState/useReducer for local state
 - **Data Fetching**: Axios with async/await
 - **Styling**: Tailwind CSS v4 classes
 
@@ -220,22 +173,16 @@ export default function UserList() {
         }
     };
 
-    return (
-        <div className="p-6">
-            <h1 className="text-2xl font-bold mb-4">Users</h1>
-        </div>
-    );
+    return <div className="p-6">Users Component</div>;
 }
 ```
 
 ## Error Handling Guidelines
-
-### PHP/Laravel
-- Use try-catch blocks for external API calls
-- Return proper HTTP status codes
-- Log errors with context
-- Use Laravel's validation for form input
-- Handle multi-tenant company context properly
+- Use try-catch for external API calls
+- Return proper HTTP status codes (200, 400, 401, 403, 404, 422, 500, 502)
+- Log errors with context including `company_id`
+- Use Laravel's validation for form inputs
+- Handle multi-tenant company context in all operations
 
 ```php
 try {
@@ -264,13 +211,11 @@ try {
 ```
 
 ## Testing Guidelines
-
-### PHPUnit Tests
-- Use descriptive test method names
-- Arrange-Act-Assert pattern
-- Test both success and failure scenarios
-- Run `./vendor/bin/pint` before committing test files
-- Test multi-tenant functionality with proper company setup
+- **Test Method Names**: Descriptive, `test_` prefix or `@test` docblock
+- **Pattern**: Arrange-Act-Assert
+- **Coverage**: Test both success and failure scenarios
+- **Multi-tenancy**: Always test with proper company context
+- **Pre-commit**: Run `./vendor/bin/pint` before committing test files
 
 ```php
 <?php
@@ -301,20 +246,11 @@ class UserTest extends TestCase
 }
 ```
 
-## Database Guidelines
+## Database & Multi-Tenancy
 
-### Migrations
-- Use descriptive table and column names
-- Include proper indexes for performance
-- Use foreign key constraints
-- Support multi-tenancy with `company_id` foreign keys
-
+### Migration Pattern
 ```php
 <?php
-
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
@@ -332,22 +268,23 @@ return new class extends Migration
 };
 ```
 
-## Multi-Tenancy Guidelines
-- All tables must have `company_id` foreign key
-- Use `auth()->user()->companies->first()->id` for current company
-- Models should automatically set `company_id` in boot method
-- Filament routes use `{tenant}` parameter (company ID)
+### Multi-Tenancy Requirements
+- **All tables** must have `company_id` foreign key with cascade delete
+- Current company: `auth()->user()->companies->first()->id`
+- Models should auto-set `company_id` in boot method
+- Filter all queries by `company_id` for security
+- Filament routes use `{tenant}` parameter (company UUID)
 
-## Security & Performance Guidelines
-- Use Laravel's built-in CSRF protection
-- Validate all user inputs
-- Use eager loading to prevent N+1 queries
-- Never commit secrets to version control
-- Filter queries by company_id for multi-tenant security
+## Security & Performance
+- Use Laravel CSRF protection
+- Validate all inputs with Laravel validation rules
+- Use eager loading (`with()`) to prevent N+1 queries
+- Never commit secrets/.env files to version control
+- Filter queries by `company_id` for multi-tenant isolation
 
 ## Pre-commit Checklist
-1. Run `./vendor/bin/pint` to fix formatting issues
-2. Run `./vendor/bin/phpunit` to ensure tests pass
-3. Test functionality manually if applicable
-4. Verify no sensitive data is committed
-5. Ensure multi-tenant relationships are properly filtered
+1. Run `./vendor/bin/pint` to fix all formatting issues
+2. Run `./vendor/bin/phpunit` - tests must pass
+3. Manual functionality testing (when applicable)
+4. Verify no sensitive data committed
+5. Confirm multi-tenant relationships properly filtered by `company_id`
