@@ -21,6 +21,8 @@ class FavoredTransactionResource extends Resource
 
     protected static ?string $navigationGroup = 'Gestão de Clientes';
 
+    protected static ?string $breadcrumb = 'Transações de Fiados de Clientes';
+
     protected static ?int $navigationSort = 2;
 
     public static function form(Form $form): Form

@@ -1,16 +1,31 @@
 # AGENTS.md - CarvaSys Development Guidelines
 
-This file contains development guidelines for agentic coding agents working on the CarvaSys Laravel project.
+This file contains development guidelines for agentic coding agents working on CarvaSys Laravel project.
 
 ## Project Overview
 CarvaSys is a Laravel 10 application with the following stack:
-- Backend: Laravel 10, PHP 8.1+, Filament 3.x
+- Backend: Laravel 10, PHP 8.4, Filament 3.x
 - Frontend: React 19.x, Inertia.js, Tailwind CSS v4, Vite 6.x
 - Database: MySQL/MariaDB with Eloquent ORM
 - Testing: PHPUnit 10.x
 - Multi-tenancy with Laravel Sanctum
+- Development: Laravel Sail (Docker)
 
 ## Build Commands
+
+### Docker/Sail Commands (Recommended)
+```bash
+# Start development environment
+./vendor/bin/sail up -d
+
+# Stop containers
+./vendor/bin/sail down
+
+# Execute commands inside container
+./vendor/bin/sail php artisan migrate
+./vendor/bin/sail npm run dev
+./vendor/bin/sail composer install
+```
 
 ### PHP/Composer Commands
 ```bash
@@ -25,6 +40,9 @@ php artisan key:generate
 
 # Run database migrations
 php artisan migrate
+
+# Fresh migrate with seeding
+php artisan migrate:fresh --seed
 
 # Start development server
 php artisan serve
@@ -71,7 +89,7 @@ npm run build
 - **File Encoding**: UTF-8
 - **Line Endings**: LF (Unix style)
 - **Code Formatter**: Laravel Pint (`./vendor/bin/pint`) - MANDATORY before commits
-- **Important**: Current codebase has 39 Pint formatting issues that must be fixed
+- **PHP Version**: 8.4+ (Laravel Sail runtime)
 
 #### Import Organization
 ```php
@@ -98,6 +116,7 @@ use App\Models\Company;
 - **Variables**: camelCase ($userData, $transactionId)
 - **Constants**: UPPER_SNAKE_CASE (API_VERSION, MAX_ATTEMPTS)
 - **Database Tables**: snake_case (users, product_categories)
+- **UUID Keys**: All models use `uuid` as route key with `getRouteKeyName()` method
 
 #### Model Guidelines
 ```php
@@ -114,6 +133,8 @@ class Transaction extends Model
     use HasFactory;
 
     protected $fillable = [
+        'uuid',
+        'company_id',
         'user_id',
         'client_id', 
         'amount',
@@ -124,6 +145,11 @@ class Transaction extends Model
         'amount' => 'decimal:2',
         'created_at' => 'datetime',
     ];
+
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
+    }
 
     public function user(): BelongsTo
     {
@@ -209,6 +235,7 @@ export default function UserList() {
 - Return proper HTTP status codes
 - Log errors with context
 - Use Laravel's validation for form input
+- Handle multi-tenant company context properly
 
 ```php
 try {
@@ -218,6 +245,7 @@ try {
         Log::error('API request failed', [
             'url' => $url,
             'status' => $response->status(),
+            'company_id' => auth()->user()->companies->first()->id,
         ]);
         
         return response()->json(['error' => 'External API error'], 502);
@@ -228,6 +256,7 @@ try {
 } catch (\Exception $e) {
     Log::error('API exception', [
         'message' => $e->getMessage(),
+        'company_id' => auth()->user()->companies->first()->id,
     ]);
     
     return response()->json(['error' => 'Internal server error'], 500);
@@ -241,6 +270,7 @@ try {
 - Arrange-Act-Assert pattern
 - Test both success and failure scenarios
 - Run `./vendor/bin/pint` before committing test files
+- Test multi-tenant functionality with proper company setup
 
 ```php
 <?php
@@ -277,6 +307,7 @@ class UserTest extends TestCase
 - Use descriptive table and column names
 - Include proper indexes for performance
 - Use foreign key constraints
+- Support multi-tenancy with `company_id` foreign keys
 
 ```php
 <?php
@@ -291,6 +322,8 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->uuid('uuid')->unique();
+            $table->foreignId('company_id')->constrained()->onDelete('cascade');
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->decimal('amount', 10, 2);
             $table->timestamps();
@@ -299,14 +332,22 @@ return new class extends Migration
 };
 ```
 
+## Multi-Tenancy Guidelines
+- All tables must have `company_id` foreign key
+- Use `auth()->user()->companies->first()->id` for current company
+- Models should automatically set `company_id` in boot method
+- Filament routes use `{tenant}` parameter (company ID)
+
 ## Security & Performance Guidelines
 - Use Laravel's built-in CSRF protection
 - Validate all user inputs
 - Use eager loading to prevent N+1 queries
 - Never commit secrets to version control
+- Filter queries by company_id for multi-tenant security
 
 ## Pre-commit Checklist
 1. Run `./vendor/bin/pint` to fix formatting issues
 2. Run `./vendor/bin/phpunit` to ensure tests pass
 3. Test functionality manually if applicable
 4. Verify no sensitive data is committed
+5. Ensure multi-tenant relationships are properly filtered

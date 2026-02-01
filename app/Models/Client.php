@@ -14,10 +14,23 @@ class Client extends Model
         'company_id',
         'name',
         'surname',
+        'email',
+        'document_type',
+        'document_number',
     ];
 
     public function company(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(\App\Models\Company::class);
+    }
+
+    public function user(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(ClientUser::class);
+    }
+
+    public function getRouteKeyName(): string
+    {
+        return 'uuid';
     }
 }
