@@ -98,7 +98,7 @@ class PasswordRecoveryController extends Controller
         // Remover todos os tokens de reset
         Password::deleteToken($user);
 
-        return redirect('/cliente/login')
+        return redirect('/client/login')
             ->with('success', 'Senha redefinida com sucesso! Faça login para continuar.');
     }
 }

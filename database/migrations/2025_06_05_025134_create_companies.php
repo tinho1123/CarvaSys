@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('companies', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->uuid('uuid')->unique();
             $table->string('name', 255);
             $table->date('foundation_date');
             $table->enum('active', ['Y', 'N']);

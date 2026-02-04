@@ -21,7 +21,15 @@ class Client extends Model
 
     public function company(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
-        return $this->belongsTo(\App\Models\Company::class);
+        return $this->belongsTo(\App\Models\Company::class, 'company_id');
+    }
+
+    public function companies(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(\App\Models\Company::class, 'client_company')
+            ->withPivot('is_active')
+            ->wherePivot('is_active', true)
+            ->withTimestamps();
     }
 
     public function user(): \Illuminate\Database\Eloquent\Relations\HasOne

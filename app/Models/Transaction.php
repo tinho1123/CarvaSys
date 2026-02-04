@@ -15,7 +15,11 @@ class Transaction extends Model
 
         static::creating(function ($transaction) {
             if (auth()->check() && ! $transaction->company_id) {
-                $transaction->company_id = auth()->user()->companies->first()->id;
+                // Para painel admin, obter empresa do usuário logado
+                $user = auth()->user();
+                if ($user instanceof \App\Models\User) {
+                    $transaction->company_id = $user->companies->first()->id;
+                }
             }
             if (! $transaction->uuid) {
                 $transaction->uuid = \Illuminate\Support\Str::uuid();

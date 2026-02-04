@@ -21,53 +21,64 @@ class AuthController extends Controller
     {
         // Se já estiver logado, redirecionar para dashboard
         if (Auth::guard('client')->check()) {
-            return redirect('/cliente/dashboard');
+            return redirect('/client/dashboard');
         }
 
         return view('client.auth.login');
     }
 
     /**
-     * Mostrar página de seleção de empresa após login.
+     * Selecionar empresa após autenticação.
+     * Define o tenant na sessão e redireciona para dashboard.
      */
-    public function showCompanySelection(Request $request)
+    public function selectCompany($companyUuid)
     {
         $clientUser = Auth::guard('client')->user();
 
-        // Buscar empresas onde o cliente tem fiados ou transações
-        // TODO: Implementar quando FavoredDebt e Transaction existirem
-        $companies = []; // $clientUser->getCompaniesWithActivity();
-
-        // Verificar se a conta está bloqueada
-        if ($clientUser && $clientUser->locked_until && now()->lt($clientUser->locked_until)) {
-            return back()
-                ->withInput($request->only('email'))
-                ->with('error', 'Conta temporariamente bloqueada. Tente novamente mais tarde.');
+        if (! $clientUser) {
+            return redirect('/client/login')
+                ->with('error', 'Você precisa fazer login primeiro.');
         }
 
-        // Verificar se o cliente pertence à empresa selecionada
-        if ($clientUser && $clientUser->company_id != $request->company_id) {
+        // Verificar se ClientUser tem acesso à empresa selecionada
+        $company = $clientUser->companies()
+            ->where('companies.uuid', $companyUuid)
+            ->where('client_company.is_active', true)
+            ->first();
+
+        if (! $company) {
             return back()
-                ->withInput($request->only('email'))
-                ->with('error', 'Este cliente não pertence à empresa selecionada.');
+                ->with('error', 'Você não tem acesso a esta empresa.');
         }
 
-        // Redirecionar para dashboard
-        return view('client.auth.company-selection', compact('companies'));
+        // Salvar empresa selecionada na sessão
+        Session::put('selected_tenant_id', $company->uuid);
+        Session::put('selected_tenant', $company);
+
+        // Atualizar último login
+        $clientUser->update([
+            'last_login_at' => now(),
+        ]);
+
+        return redirect('/client/dashboard')
+            ->with('success', 'Empresa selecionada com sucesso!');
     }
 
-    /* Processar login do cliente. */
+    /**
+     * Processar login do cliente (CPF + Senha, SEM empresa).
+     * Retorna status de autenticação e lista de empresas disponíveis.
+     */
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
+            'document_number' => 'required|string',
             'password' => 'required|string|min:6',
-            'company_id' => 'required|uuid|exists:companies,uuid',
         ]);
-        // Buscar usuário cliente
-        $clientUser = ClientUser::with(['client', 'company'])
-            ->where('email', $request->email)
+
+        // Buscar usuário cliente pelo documento (CPF/CNPJ)
+        $clientUser = ClientUser::where('document_number', $request->document_number)
             ->first();
+
         if (! $clientUser || ! Hash::check($request->password, $clientUser->password)) {
             // Incrementar tentativas de login
             if ($clientUser) {
@@ -83,34 +94,78 @@ class AuthController extends Controller
             }
 
             return back()
-                ->withInput($request->only('email'))
-                ->with('error', 'Credenciais inválidas ou conta bloqueada.');
+                ->withInput($request->only('document_number'))
+                ->with('error', 'CPF/CNPJ ou senha inválidos.');
         }
+
         // Verificar se a conta está bloqueada
-        if ($clientUser && $clientUser->locked_until && now()->lt($clientUser->locked_until)) {
+        if ($clientUser->locked_until && now()->lt($clientUser->locked_until)) {
             return back()
-                ->withInput($request->only('email'))
+                ->withInput($request->only('document_number'))
                 ->with('error', 'Conta temporariamente bloqueada. Tente novamente mais tarde.');
         }
-        // Verificar se o cliente pertence à empresa selecionada
-        if ($clientUser->company_id != $request->company_id) {
+
+        // Verificar se tem empresas acessíveis
+        $companies = $clientUser->companies()
+            ->where('client_company.is_active', true)
+            ->get(['companies.id', 'companies.uuid', 'companies.name']);
+
+        if ($companies->isEmpty()) {
             return back()
-                ->withInput($request->only('email'))
-                ->with('error', 'Este cliente não pertence à empresa selecionada.');
+                ->withInput($request->only('document_number'))
+                ->with('error', 'Nenhuma empresa disponível para este cliente.');
         }
-        // Resetar tentativas e registrar último login
+
+        // Resetar tentativas
         $clientUser->update([
             'login_attempts' => 0,
             'locked_until' => null,
-            'last_login_at' => now(),
         ]);
-        // Logar o cliente
-        Auth::guard('client')->login($clientUser);
-        // Salvar empresa selecionada na sessão
-        Session::put('selected_company', $request->company_id);
 
-        // Redirecionar para dashboard
-        return redirect('/cliente/dashboard');
+        // Logar o cliente (sem tenant por enquanto)
+        Auth::guard('client')->login($clientUser);
+
+        // Se apenas 1 empresa, selecionar automaticamente
+        if ($companies->count() === 1) {
+            $company = $companies->first();
+            return $this->selectCompany($company->uuid);
+        }
+
+        // Múltiplas empresas: mostrar modal de seleção
+        Session::put('client_authenticated', true);
+        Session::put('client_companies', $companies);
+
+        return redirect('/client/dashboard')
+            ->with('show_company_selection', true);
+    }
+
+    /**
+     * Mostrar página de seleção de empresa após autenticação.
+     */
+    public function showCompanySelection()
+    {
+        $clientUser = Auth::guard('client')->user();
+
+        if (! $clientUser) {
+            return redirect('/client/login');
+        }
+
+        // Buscar empresas acessíveis
+        $companies = $clientUser->companies()
+            ->where('client_company.is_active', true)
+            ->get();
+
+        if ($companies->isEmpty()) {
+            return redirect('/client/login')
+                ->with('error', 'Nenhuma empresa disponível para este cliente.');
+        }
+
+        // Se apenas 1 empresa, selecionar automaticamente
+        if ($companies->count() === 1) {
+            return $this->selectCompany($companies->first()->uuid);
+        }
+
+        return view('client.select-company', compact('companies'));
     }
 
     /**
@@ -119,9 +174,10 @@ class AuthController extends Controller
     public function logout()
     {
         Auth::guard('client')->logout();
-        Session::forget('selected_company');
+        Session::forget('selected_tenant_id');
+        Session::forget('selected_tenant');
 
-        return redirect('/cliente/login')
+        return redirect('/client/login')
             ->with('success', 'Você saiu com sucesso.');
     }
 
@@ -191,7 +247,7 @@ class AuthController extends Controller
             'document_number' => $request->document_number,
         ]);
 
-        return redirect('/cliente/login')
+        return redirect('/client-admin/login')
             ->with('success', 'Acesso criado com sucesso! Faça login para continuar.');
     }
 

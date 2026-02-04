@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\FavoredTransaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -36,7 +37,7 @@ class FavoredTransactionController extends Controller
     public function store(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'client_id' => 'required|uuid|exists:clients,uuid',
+            'client_id' => 'required|exists:clients,id',
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
             'amount' => 'required|numeric|min:0',

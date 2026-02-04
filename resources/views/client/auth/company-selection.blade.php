@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function loadCompanies() {
-    fetch('/cliente/auth/companies')
+    fetch('/client/auth/companies')
         .then(response => response.json())
         .then(data => {
             const select = document.getElementById('company');
@@ -78,14 +78,14 @@ document.querySelector('form').addEventListener('submit', function(e) {
     
     const formData = new FormData(e.target);
     
-    fetch('/cliente/auth/companies', {
+    fetch('/client/auth/companies', {
         method: 'POST',
         body: formData
     })
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            window.location.href = '/cliente/dashboard';
+            window.location.href = '/client/dashboard';
         } else {
             alert(data.message || 'Ocorreu um erro. Tente novamente.');
         }

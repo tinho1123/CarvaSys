@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('clients', function (Blueprint $table) {
             $table->id();
-            $table->uuid()->default(Str::uuid());
-            $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
+            $table->uuid('uuid')->unique();
             $table->string('name');
             $table->string('surname');
+            $table->string('email')->nullable();
+            $table->string('document_type')->nullable(); // cpf, cnpj
+            $table->string('document_number')->nullable();
             $table->timestamps();
         });
     }

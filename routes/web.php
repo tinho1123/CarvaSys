@@ -26,11 +26,21 @@ Route::post('/login', [LoginController::class, 'authenticate'])->middleware('gue
 Route::post('/logout', [LogoutController::class, 'logout'])->middleware('auth');
 
 // Rotas do Portal do Cliente
-Route::prefix('cliente')->name('client.')->group(function () {
+Route::prefix('client')->name('client.')->group(function () {
     // Autenticação
     Route::get('/login', [ClientAuthController::class, 'showLoginForm'])->name('login');
     Route::post('/login', [ClientAuthController::class, 'login'])->name('login.post');
     Route::post('/logout', [ClientAuthController::class, 'logout'])->name('logout');
+    
+    // Seleção de empresa (após autenticação)
+    Route::get('/select-company', [ClientAuthController::class, 'showCompanySelection'])
+        ->middleware('auth:client')
+        ->name('select.company.form');
+    Route::post('/select-company/{companyUuid}', [ClientAuthController::class, 'selectCompany'])
+        ->middleware('auth:client')
+        ->name('select.company');
+    
+    // Recuperação de senha
     Route::get('/esqueci-senha', [ClientPasswordRecoveryController::class, 'showRecoveryForm'])->name('password.recovery');
     Route::post('/esqueci-senha', [ClientPasswordRecoveryController::class, 'sendRecoveryToken'])->name('password.recovery.post');
     Route::get('/redefinir-senha/{token}', [ClientPasswordRecoveryController::class, 'showResetForm'])->name('password.reset');

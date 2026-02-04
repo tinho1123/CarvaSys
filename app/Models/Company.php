@@ -17,6 +17,7 @@ class Company extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'uuid',
         'name',
         'foundation_date',
     ];
@@ -41,9 +42,11 @@ class Company extends Model
         return $this->hasMany(\App\Models\Product::class);
     }
 
-    public function clients(): HasMany
+    public function clients(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
     {
-        return $this->hasMany(\App\Models\Client::class);
+        return $this->belongsToMany(\App\Models\Client::class, 'client_company')
+            ->withPivot('is_active')
+            ->withTimestamps();
     }
 
     public function fees(): HasMany

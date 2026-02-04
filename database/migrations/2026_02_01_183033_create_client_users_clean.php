@@ -14,8 +14,7 @@ return new class extends Migration
         Schema::create('client_users', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->uuid('client_id');
-            $table->unsignedBigInteger('company_id');
+            $table->foreignId('client_id')->constrained('clients')->cascadeOnDelete();
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
@@ -29,7 +28,7 @@ return new class extends Migration
             $table->timestamps();
 
             // Índices
-            $table->index(['client_id', 'company_id']);
+            $table->index('client_id');
             $table->index('email');
             $table->index('document_number');
         });

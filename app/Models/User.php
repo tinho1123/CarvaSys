@@ -51,14 +51,19 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         return $this->belongsToMany(\App\Models\Company::class, 'companies_users');
     }
 
+    public function companies(): BelongsToMany
+    {
+        return $this->company();
+    }
+
     public function getTenants(\Filament\Panel $panel): \Illuminate\Support\Collection
     {
-        return $this->company()->get();
+        return $this->companies()->get();
     }
 
     public function canAccessTenant(\Illuminate\Database\Eloquent\Model $tenant): bool
     {
-        return $this->company()->whereKey($tenant)->exists();
+        return $this->companies()->wherePivot('company_id', $tenant->id)->exists();
     }
 
     public function canAccessPanel(\Filament\Panel $panel): bool

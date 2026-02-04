@@ -30,7 +30,7 @@ return new class extends Migration
             $table->string('category_name', 255)->nullable();
             $table->unsignedBigInteger('category_id')->nullable();
             $table->string('client_name', 255)->nullable();
-            $table->uuid('client_id')->nullable();
+            $table->unsignedBigInteger('client_id')->nullable();
             $table->timestamps();
 
             $table->index(['company_id', 'favored_id']);

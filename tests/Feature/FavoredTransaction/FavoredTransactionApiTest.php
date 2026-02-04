@@ -84,7 +84,7 @@ class FavoredTransactionApiTest extends TestCase
     public function it_can_create_favored_transaction()
     {
         $transactionData = [
-            'client_id' => $this->client->uuid,
+            'client_id' => $this->client->id,
             'name' => 'Test API Transaction',
             'description' => 'Created via API',
             'favored_total' => 150.00,
@@ -124,7 +124,7 @@ class FavoredTransactionApiTest extends TestCase
     public function it_validates_client_exists_on_create()
     {
         $response = $this->postJson('/api/favored-transactions', [
-            'client_id' => \Illuminate\Support\Str::uuid(),
+            'client_id' => 999999,
             'name' => 'Test Transaction',
             'favored_total' => 100.00,
             'quantity' => 1,

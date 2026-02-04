@@ -65,6 +65,29 @@ class FavoredTransaction extends Model
         return 'uuid';
     }
 
+    protected static function booted(): void
+    {
+        static::creating(function (FavoredTransaction $model) {
+            // If amount or total_amount are not provided, default them
+            // to the favored_total when available, or to 0.
+            if (is_null($model->amount)) {
+                $model->amount = $model->favored_total ?? 0;
+            }
+
+            if (is_null($model->total_amount)) {
+                $model->total_amount = $model->favored_total ?? $model->amount ?? 0;
+            }
+
+            if (is_null($model->favored_total)) {
+                $model->favored_total = $model->total_amount ?? $model->amount ?? 0;
+            }
+
+            if (is_null($model->favored_paid_amount)) {
+                $model->favored_paid_amount = 0;
+            }
+        });
+    }
+
     public function getRemainingBalance(): float
     {
         return $this->favored_total - $this->favored_paid_amount;

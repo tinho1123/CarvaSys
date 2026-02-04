@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use App\Models\CompaniesUsers;
 use App\Models\Company;
 use App\Models\User;
@@ -32,9 +31,11 @@ class DatabaseSeeder extends Seeder
             'password' => Hash::make('Well.10091999'),
         ]);
         $companies_users = CompaniesUsers::create([
-            'uuid' => Str::uuid(),
             'company_id' => $company->id,
             'user_id' => $user->id,
         ]);
+
+        // Chamar o seeder de clientes
+        $this->call(ClienteSeeder::class);
     }
 }
