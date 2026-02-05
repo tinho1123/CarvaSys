@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->uuid()->default(Str::uuid());
             $table->foreignId('company_id')->constrained('companies')->cascadeOnDelete();
-            $table->string('description');
+            $table->string('name');
+            $table->string('description')->nullable();
+            $table->enum('active', ['Y', 'N'])->default('Y');
             $table->timestamps();
         });
     }

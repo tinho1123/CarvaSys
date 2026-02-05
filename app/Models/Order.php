@@ -49,14 +49,6 @@ class Order extends Model
     }
 
     /**
-     * Get the Client that owns this order.
-     */
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class);
-    }
-
-    /**
      * Get the items for this order.
      */
     public function items(): HasMany

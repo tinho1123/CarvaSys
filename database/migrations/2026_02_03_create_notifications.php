@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('notifications', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique();
-            $table->foreignId('client_user_id')->constrained()->onDelete('cascade');
+            $table->unsignedBigInteger('client_user_id')->nullable();
             $table->foreignId('company_id')->constrained()->onDelete('cascade');
             $table->string('type'); // order_update, payment_reminder, credit_warning, announcement
             $table->string('title');

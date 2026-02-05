@@ -2,7 +2,7 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Client\Pages\ClientDashboard;
+use App\Filament\Client\Pages\ClientLogin;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -25,8 +25,8 @@ class ClientPanelProvider extends PanelProvider
     {
         return $panel
             ->id('client')
-            ->path('client-admin')
-            ->login(\App\Filament\Client\Pages\ClientLogin::class)
+            ->path('client')
+            ->login(ClientLogin::class)
             ->colors([
                 'danger' => Color::Rose,
                 'gray' => Color::Gray,
@@ -40,20 +40,19 @@ class ClientPanelProvider extends PanelProvider
                 slugAttribute: 'uuid',
                 ownershipRelationship: 'company'
             )
-            ->tenantMiddleware([
-                \App\Http\Middleware\SetClientTenant::class,
-            ], isPersistent: true)
-            ->tenantRegistration(false)
-            ->brandName('CarvaSys Cliente')
+            ->authGuard('client')
+            ->brandName('Painel do Cliente')
             ->defaultThemeMode(ThemeMode::Dark)
             ->discoverResources(in: app_path('Filament/Client/Resources'), for: 'App\\Filament\\Client\\Resources')
-            ->discoverPages(in: app_path('Filament/Client/Pages'), for: 'App\\Filament\\Client\\Pages')
             ->pages([
-            ClientDashboard::class,
+                \Filament\Pages\Dashboard::class,
             ])
             ->discoverWidgets(in: app_path('Filament/Client/Widgets'), for: 'App\\Filament\\Client\\Widgets')
             ->widgets([
-                Widgets\AccountWidget::class,
+                \App\Filament\Client\Widgets\ClientStatsOverview::class,
+                \App\Filament\Client\Widgets\ClientSpendingChart::class,
+                \App\Filament\Client\Widgets\ClientDebtChart::class,
+                \App\Filament\Client\Widgets\LatestTransactionsWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,
@@ -65,10 +64,10 @@ class ClientPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
+                \App\Http\Middleware\ClientTenantResolver::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ])
-            ->authGuard('client');
+            ]);
     }
 }

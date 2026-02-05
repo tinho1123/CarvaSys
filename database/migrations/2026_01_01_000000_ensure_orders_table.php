@@ -16,7 +16,7 @@ return new class extends Migration
                 $table->id();
                 $table->uuid('uuid')->unique();
                 $table->foreignId('company_id')->constrained()->onDelete('cascade');
-                $table->foreignId('client_id')->nullable()->constrained()->onDelete('cascade');
+                $table->foreignId('client_id')->constrained()->onDelete('cascade');
                 $table->decimal('subtotal', 12, 2);
                 $table->decimal('discount_amount', 12, 2)->default(0);
                 $table->decimal('fee_amount', 12, 2)->default(0);
@@ -30,7 +30,7 @@ return new class extends Migration
                 $table->timestamps();
 
                 // Indexes
-                $table->index(['company_id', 'client_id']);
+                $table->index(['company_id']);
                 $table->index('status');
                 $table->index('created_at');
             });

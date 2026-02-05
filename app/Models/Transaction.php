@@ -47,6 +47,7 @@ class Transaction extends Model
         'client_name',
         'client_id',
         'type',
+        'payment_method',
     ];
 
     public function company(): \Illuminate\Database\Eloquent\Relations\BelongsTo
@@ -62,11 +63,6 @@ class Transaction extends Model
     public function fee(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(\App\Models\Fee::class);
-    }
-
-    public function client(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(\App\Models\Client::class, 'client_id');
     }
 
     public function getRouteKeyName(): string

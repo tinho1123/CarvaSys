@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
             'user_id' => $user->id,
         ]);
 
-        // Chamar o seeder de clientes
-        $this->call(ClienteSeeder::class);
+        // Chamar seeders
+        $this->call(ClientSeeder::class);
     }
 }

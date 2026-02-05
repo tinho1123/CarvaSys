@@ -8,7 +8,7 @@ export default defineConfig({
         tailwindcss(),
         react(),
         laravel({
-            input: ['resources/js/app.js'],
+            input: ['resources/js/app.jsx'],
             refresh: true,
         }),
     ],

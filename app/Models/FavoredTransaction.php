@@ -25,9 +25,11 @@ class FavoredTransaction extends Model
         'quantity',
         'image',
         'active',
+        'due_date',
         'category_name',
         'category_id',
         'client_name',
+        'order_id',
     ];
 
     protected $casts = [
@@ -38,16 +40,17 @@ class FavoredTransaction extends Model
         'favored_paid_amount' => 'decimal:2',
         'quantity' => 'integer',
         'active' => 'boolean',
+        'due_date' => 'date',
     ];
+
+    public function order(): BelongsTo
+    {
+        return $this->belongsTo(Order::class);
+    }
 
     public function company(): BelongsTo
     {
         return $this->belongsTo(Company::class);
-    }
-
-    public function client(): BelongsTo
-    {
-        return $this->belongsTo(Client::class, 'client_id');
     }
 
     public function product(): BelongsTo

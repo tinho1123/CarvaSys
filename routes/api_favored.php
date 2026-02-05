@@ -10,7 +10,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/', [FavoredTransactionController::class, 'index'])->name('index');
         Route::post('/', [FavoredTransactionController::class, 'store'])->name('store');
         Route::get('/clients-with-transactions', [FavoredTransactionController::class, 'getClientsWithTransactions'])->name('clients-with-transactions');
-        Route::get('/{client}', [FavoredTransactionController::class, 'index'])->name('by-client');
         Route::put('/{transaction}', [FavoredTransactionController::class, 'update'])->name('update');
         Route::delete('/{transaction}', [FavoredTransactionController::class, 'destroy'])->name('destroy');
         Route::post('/{transaction}/pay', [FavoredTransactionController::class, 'payDebt'])->name('pay');

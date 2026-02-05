@@ -13,6 +13,12 @@ return new class extends Migration
     {
         Schema::create('favored_debts', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('company_id')->constrained()->onDelete('cascade');
+            $table->foreignId('client_id')->constrained()->onDelete('cascade');
+            $table->decimal('amount', 12, 2);
+            $table->string('description')->nullable();
+            $table->date('due_date')->nullable();
+            $table->string('status')->default('pending'); // pending, paid, cancelled
             $table->timestamps();
         });
     }

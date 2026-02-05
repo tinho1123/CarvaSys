@@ -19,7 +19,21 @@ class Company extends Model
     protected $fillable = [
         'uuid',
         'name',
+        'description',
+        'type',
+        'logo_path',
+        'banner_path',
         'foundation_date',
+        'rating',
+        'delivery_time',
+        'is_promoted',
+        'active',
+    ];
+
+    protected $casts = [
+        'foundation_date' => 'date',
+        'rating' => 'decimal:1',
+        'is_promoted' => 'boolean',
     ];
 
     public function users(): BelongsToMany
@@ -40,13 +54,6 @@ class Company extends Model
     public function products(): HasMany
     {
         return $this->hasMany(\App\Models\Product::class);
-    }
-
-    public function clients(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
-    {
-        return $this->belongsToMany(\App\Models\Client::class, 'client_company')
-            ->withPivot('is_active')
-            ->withTimestamps();
     }
 
     public function fees(): HasMany

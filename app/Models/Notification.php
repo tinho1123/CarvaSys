@@ -29,14 +29,6 @@ class Notification extends Model
     ];
 
     /**
-     * Get the ClientUser that owns this notification.
-     */
-    public function clientUser(): BelongsTo
-    {
-        return $this->belongsTo(ClientUser::class);
-    }
-
-    /**
      * Get the Company that owns this notification.
      */
     public function company(): BelongsTo

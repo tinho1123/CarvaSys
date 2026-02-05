@@ -2,59 +2,68 @@
 
 namespace App\Filament\Client\Pages;
 
+use App\Models\Client;
+use App\Models\Company;
 use DanHarrin\LivewireRateLimiting\Exceptions\TooManyRequestsException;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Section;
+use Filament\Actions\Action;
+use Filament\Actions\Concerns\InteractsWithActions;
+use Filament\Actions\Contracts\HasActions;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Http\Responses\Auth\Contracts\LoginResponse;
 use Filament\Pages\Auth\Login as BaseLogin;
-use Filament\Actions\Action;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
-use Filament\Facades\Filament;
 
-class ClientLogin extends BaseLogin
+class ClientLogin extends BaseLogin implements HasActions
 {
-    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+    use InteractsWithActions;
 
-    public $showModal = false;
-    public $companies = [];
-    public $selectedCompanyId = null;
-    public $authenticatedUserId = null;
+    public array $companies = [];
 
-    public function getView(): string
+    /**
+     * Ação de seleção de empresa (Modal)
+     */
+    public function selectCompanyAction(): Action
     {
-        return 'filament.client.pages.client-login';
-    }
-
-    public function mount(): void
-    {
-        // Clear previous tenant selection from session
-        session()->forget('selected_tenant_id');
-
-        // Don't redirect even if authenticated - let the user select company
-        $this->form->fill();
+        return Action::make('selectCompany')
+            ->label('Selecionar Empresa')
+            ->modalHeading('Selecione a Empresa')
+            ->modalSubmitActionLabel('Acessar')
+            ->form([
+                Select::make('company_uuid')
+                    ->label('Empresa')
+                    ->options(fn () => collect($this->companies)->pluck('name', 'uuid'))
+                    ->required()
+                    ->native(false),
+            ])
+            ->action(function (array $data) {
+                return $this->redirectToTenant($data['company_uuid']);
+            })
+            ->closeModalByClickingAway(false);
     }
 
     public function form(Form $form): Form
     {
-        $schema = [
-            TextInput::make('cpf')
-                ->label('CPF')
-                ->required()
-                ->mask('999.999.999-99')
-                ->validationAttribute('CPF'),
-
-            TextInput::make('password')
-                ->label('Senha')
-                ->password()
-                ->required(),
-        ];
-
         return $form
-            ->schema($schema)
-            ->statePath('data');
+            ->schema([
+                TextInput::make('document_number')
+                    ->label('CPF/CNPJ')
+                    ->required()
+                    ->mask('999.999.999-99')
+                    ->placeholder('000.000.000-00')
+                    ->autocomplete('off')
+                    ->autofocus(),
+
+                TextInput::make('password')
+                    ->label('Senha')
+                    ->password()
+                    ->revealable()
+                    ->required(),
+            ])
+            ->statePath('data'); // OBRIGATÓRIO para o template simple do Filament
     }
 
     public function authenticate(): ?LoginResponse
@@ -63,7 +72,7 @@ class ClientLogin extends BaseLogin
             $this->rateLimit(5);
         } catch (TooManyRequestsException $exception) {
             throw ValidationException::withMessages([
-                'cpf' => __('filament::login.messages.throttled', [
+                'data.document_number' => __('filament-panels::pages/auth/login.messages.throttled', [
                     'seconds' => $exception->secondsUntilAvailable,
                     'minutes' => ceil($exception->secondsUntilAvailable / 60),
                 ]),
@@ -71,104 +80,68 @@ class ClientLogin extends BaseLogin
         }
 
         $data = $this->form->getState();
+        $document = preg_replace('/[^0-9]/', '', $data['document_number']);
 
-        // Clean CPF for search
-        $cpf = preg_replace('/[^0-9]/', '', $data['cpf']);
+        $client = Client::where('document_number', $document)->first();
 
-        // Try to authenticate with CPF
-        if (! Auth::guard('client')->attempt([
-            'document_number' => $cpf,
-            'document_type' => 'cpf',
-            'password' => $data['password'],
-        ])) {
+        if (! $client) {
             throw ValidationException::withMessages([
-                'cpf' => __('filament::login.messages.failed'),
+                'data.document_number' => 'CPF/CNPJ não encontrado.',
             ]);
         }
 
-        // Get authenticated user
-        $user = Auth::guard('client')->user();
-
-        // Check if user has associated companies
-        try {
-            $companies = $user->companies()->get();
-        } catch (\Exception $e) {
-            \Illuminate\Support\Facades\Log::error('Error loading companies for user ' . $user->id . ': ' . $e->getMessage());
+        if (! $client->validateLoginAttempts()) {
             throw ValidationException::withMessages([
-                'cpf' => 'Erro interno ao carregar empresas.',
+                'data.document_number' => 'Conta bloqueada temporariamente.',
             ]);
         }
 
-        if ($companies->isEmpty()) {
+        if (! Hash::check($data['password'], $client->password)) {
+            $client->incrementLoginAttempts();
+            throw ValidationException::withMessages([
+                'data.document_number' => 'Credenciais inválidas.',
+            ]);
+        }
+
+        if (! $client->active) {
+            throw ValidationException::withMessages([
+                'data.document_number' => 'Conta inativa.',
+            ]);
+        }
+
+        $client->resetLoginAttempts();
+        Auth::guard('client')->login($client, true);
+
+        $companies = $client->companies()->get(['companies.uuid', 'companies.name'])->toArray();
+
+        if (empty($companies)) {
             Auth::guard('client')->logout();
             throw ValidationException::withMessages([
-                'cpf' => 'Você não tem acesso a nenhuma empresa.',
+                'data.document_number' => 'Sem acesso a empresas.',
             ]);
         }
 
-        // Always show company selection - don't redirect automatically
-        $this->companies = $companies->map(fn ($company) => [
-            'id' => $company->id,
-            'name' => $company->name,
-            'uuid' => $company->uuid,
-        ])->toArray();
+        if (count($companies) === 1) {
+            return $this->redirectToTenant($companies[0]['uuid']);
+        }
 
-        // Store user ID for later use
-        $this->authenticatedUserId = $user->id;
-
-        // IMPORTANT: Clear tenant from session to prevent automatic redirect
-        session()->forget('selected_tenant_id');
-
-        $this->showModal = true;
+        // Múltiplas empresas: Abrir Modal
+        $this->companies = $companies;
+        $this->mountAction('selectCompany');
 
         return null;
     }
 
-    public function selectCompany(): LoginResponse
+    protected function redirectToTenant(string $tenantUuid): LoginResponse
     {
-        if (empty($this->selectedCompanyId)) {
-            throw ValidationException::withMessages([
-                'selectedCompanyId' => 'Please select a company.',
-            ]);
-        }
+        $tenant = Company::where('uuid', $tenantUuid)->firstOrFail();
+        session()->put('selected_tenant_id', $tenant->id);
 
-        // Find the selected company
-        $company = collect($this->companies)->firstWhere('id', $this->selectedCompanyId);
-
-        if (!$company) {
-            throw ValidationException::withMessages([
-                'selectedCompanyId' => 'Invalid company selected.',
-            ]);
-        }
-
-        // Set tenant ANTES de retornar
-        $companyModel = \App\Models\Company::find($company['id']);
-        $this->setTenant($companyModel);
-
-        // Set cookie, session, and localStorage APENAS após selecionar empresa
-        session(['selected_company' => $company['uuid']]);
-        $this->js("localStorage.setItem('selected_company', '{$company['uuid']}'); document.cookie = 'selected_company={$company['uuid']}; path=/; max-age=31536000';");
-
-        // Close modal
-        $this->showModal = false;
-
-        // Log para debug
-        \Illuminate\Support\Facades\Log::info('ClientLogin selectCompany', [
-            'user_id' => $this->authenticatedUserId,
-            'company_id' => $company['id'],
-            'company_uuid' => $company['uuid'],
-        ]);
-
-        // Return custom login response that redirects to dashboard with tenant
-        return app(ClientLoginResponse::class);
+        return app(LoginResponse::class);
     }
 
-    protected function setTenant($company): void
+    protected function getAuthGuard(): string
     {
-        // Set tenant in global context
-        app()->singleton('current_tenant', fn () => $company);
-
-        // Add to session for future requests
-        session(['selected_tenant_id' => $company->uuid]);
+        return 'client';
     }
 }

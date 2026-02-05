@@ -30,7 +30,9 @@ return new class extends Migration
             $table->string('category_name');
             $table->foreignId('category_id')->constrained('products_categories')->cascadeOnUpdate();
             $table->string('client_name');
-            $table->foreignId('client_id')->constrained('clients')->cascadeOnUpdate();
+            $table->foreignId('client_id')->nullable()->constrained('clients')->nullOnDelete();
+            $table->string('type')->default('sale'); // sale, payment, credit, etc.
+            $table->string('payment_method')->nullable(); // pix, cash, debit_card, credit_card, etc.
             $table->timestamps();
         });
     }

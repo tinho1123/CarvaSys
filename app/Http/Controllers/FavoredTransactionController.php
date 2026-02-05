@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Client;
 use App\Models\FavoredTransaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -10,23 +9,14 @@ use Illuminate\Support\Facades\DB;
 
 class FavoredTransactionController extends Controller
 {
-    public function index(?Client $client = null): JsonResponse
+    public function index(): JsonResponse
     {
-        if ($client) {
-            $this->authorize('view', $client);
-        }
-
-        $query = FavoredTransaction::with(['client', 'product', 'category'])
+        $query = FavoredTransaction::with(['product', 'category'])
             ->where('company_id', auth()->user()->companies->first()->id);
-
-        if ($client) {
-            $query->where('client_id', $client->id);
-        }
 
         $transactions = $query->orderBy('created_at', 'desc')->get();
 
         return response()->json([
-            'client' => $client,
             'transactions' => $transactions,
             'total_debt' => $transactions->sum('favored_total'),
             'total_paid' => $transactions->sum('favored_paid_amount'),
