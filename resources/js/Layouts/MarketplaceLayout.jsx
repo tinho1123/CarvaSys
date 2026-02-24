@@ -2,36 +2,72 @@ import React, { useState, useEffect } from 'react';
 import { Head, Link, router } from '@inertiajs/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { SignIn, useUser, SignOutButton, useSignIn } from '@clerk/clerk-react';
-import { User, LogIn, X, Mail, Github, Chrome, Facebook, LogOut, ShoppingCart, Search } from 'lucide-react';
+import { User, LogIn, X, Mail, Github, Chrome, Facebook, LogOut, ShoppingCart, Search, Package } from 'lucide-react';
 import axios from 'axios';
+import { usePage } from '@inertiajs/react';
 
 export default function MarketplaceLayout({ children }) {
+    const { auth, orders_count } = usePage().props;
+    console.log('MARKETPLACE PROPS:', { auth, orders_count });
     const [isAuthOpen, setIsAuthOpen] = useState(false);
-    const { isSignedIn, user, isLoaded: isUserLoaded } = useUser();
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Auth state consolidation
+    const { isSignedIn: isClerkSignedIn, user: clerkUser, isLoaded: isUserLoaded } = useUser();
+    const isLaravelSignedIn = !!auth.user;
+    const isAuthenticated = isClerkSignedIn || isLaravelSignedIn;
+
+    const displayUser = isLaravelSignedIn ? auth.user : (isClerkSignedIn ? clerkUser : null);
+
     const { signIn, isLoaded } = useSignIn();
 
     // Sincronizar usuário com backend após login
     useEffect(() => {
-        if (isUserLoaded && isSignedIn && user) {
+        if (isUserLoaded && isClerkSignedIn && clerkUser) {
             // Se já estivermos na página de completar perfil, não precisamos sincronizar de novo via layout
             if (window.location.pathname === '/complete-profile') return;
+            if (isLaravelSignedIn) return; // Já sincronizado
 
-            console.log('Clerk User detected, syncing with backend...', user.id);
+            console.log('Clerk User detected, syncing with backend...', clerkUser.id);
             axios.post(route('marketplace.sso-callback'), {
-                clerk_id: user.id,
-                email: user.primaryEmailAddress?.emailAddress,
-                name: user.fullName
+                clerk_id: clerkUser.id,
+                email: clerkUser.primaryEmailAddress?.emailAddress,
+                name: clerkUser.fullName
             }).then(response => {
-                console.log('SSO Sync Response:', response.data);
                 if (response.data.status === 'incomplete_profile') {
-                    // Só redireciona se não estivermos lá
                     router.visit(response.data.redirect_url);
+                } else if (response.data.status === 'success') {
+                    router.reload(); // Refresh to get auth.user
                 }
             }).catch(err => {
                 console.error('SSO Callback error:', err.response?.data || err.message);
             });
         }
-    }, [isUserLoaded, isSignedIn, user]);
+    }, [isUserLoaded, isClerkSignedIn, clerkUser, isLaravelSignedIn]);
+
+    const handleManualLogin = (e) => {
+        e.preventDefault();
+        setIsLoading(true);
+        router.post(route('marketplace.login'), {
+            email,
+            password
+        }, {
+            onFinish: () => {
+                setIsLoading(false);
+            },
+            onSuccess: () => {
+                setIsAuthOpen(false);
+                setEmail('');
+                setPassword('');
+            }
+        });
+    };
+
+    const handleLogout = () => {
+        router.post(route('marketplace.logout'));
+    };
 
     const handleOAuthSignIn = async (strategy) => {
         if (!isLoaded) return;
@@ -80,17 +116,49 @@ export default function MarketplaceLayout({ children }) {
                         </div>
 
                         <div className="flex items-center gap-4">
-                            {isSignedIn ? (
-                                <div className="flex items-center gap-3">
-                                    <span className="hidden sm:inline text-sm font-medium text-gray-600">Olá, {user.firstName || 'Usuário'}</span>
-                                    <div className="h-8 w-8 rounded-full bg-red-100 border border-red-200 flex items-center justify-center overflow-hidden">
-                                        <img src={user.imageUrl} alt="Profile" className="h-full w-full object-cover" />
+                            {isAuthenticated ? (
+                                <div className="flex items-center gap-6">
+                                    <div className="flex items-center gap-2">
+                                        <Link
+                                            href={route('marketplace.orders')}
+                                            className={`relative flex items-center gap-2 text-sm font-semibold transition-colors py-2 px-1 rounded-lg ${window.location.pathname === '/meus-pedidos' ? 'text-red-500' : 'text-gray-600 hover:text-red-500'}`}
+                                        >
+                                            <Package size={18} />
+                                            <span className="hidden lg:inline">Meus Pedidos</span>
+                                            {orders_count?.unfinished > 0 && (
+                                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold h-4 w-4 rounded-full flex items-center justify-center animate-pulse">
+                                                    {orders_count.unfinished}
+                                                </span>
+                                            )}
+                                        </Link>
                                     </div>
-                                    <SignOutButton>
-                                        <button className="text-gray-400 hover:text-red-500 transition-colors">
-                                            <LogOut size={18} />
-                                        </button>
-                                    </SignOutButton>
+
+                                    <div className="flex items-center gap-3">
+                                        <div className="text-right hidden sm:block">
+                                            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none mb-1">Bem-vindo</p>
+                                            <p className="text-sm font-bold text-gray-900 leading-none">{displayUser?.name || displayUser?.firstName || 'Usuário'}</p>
+                                        </div>
+                                        <div className="h-9 w-9 rounded-full bg-gradient-to-tr from-red-500 to-red-400 p-0.5 shadow-sm">
+                                            <div className="h-full w-full rounded-full bg-white flex items-center justify-center overflow-hidden">
+                                                <img src={displayUser?.imageUrl || '/default-avatar.png'} alt="Profile" className="h-full w-full object-cover" />
+                                            </div>
+                                        </div>
+                                        {isClerkSignedIn ? (
+                                            <SignOutButton>
+                                                <button title="Sair" className="text-gray-400 hover:text-red-500 transition-colors p-1">
+                                                    <LogOut size={18} />
+                                                </button>
+                                            </SignOutButton>
+                                        ) : (
+                                            <button
+                                                onClick={handleLogout}
+                                                title="Sair"
+                                                className="text-gray-400 hover:text-red-500 transition-colors p-1"
+                                            >
+                                                <LogOut size={18} />
+                                            </button>
+                                        )}
+                                    </div>
                                 </div>
                             ) : (
                                 <button
@@ -183,12 +251,15 @@ export default function MarketplaceLayout({ children }) {
                                 </div>
 
                                 {/* Formulário de E-mail/Senha */}
-                                <form className="flex flex-col gap-4">
+                                <form onSubmit={handleManualLogin} className="flex flex-col gap-4">
                                     <div className="flex flex-col gap-1.5">
                                         <label className="text-xs font-bold text-gray-400 uppercase tracking-wider px-1">E-mail</label>
                                         <div className="relative">
                                             <input
                                                 type="email"
+                                                value={email}
+                                                onChange={(e) => setEmail(e.target.value)}
+                                                required
                                                 placeholder="seu@email.com"
                                                 className="w-full bg-gray-50 border-gray-200 rounded-xl py-3 pl-10 pr-4 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm outline-none"
                                             />
@@ -199,10 +270,13 @@ export default function MarketplaceLayout({ children }) {
                                     <div className="flex flex-col gap-1.5">
                                         <div className="flex justify-between items-center px-1">
                                             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider">Senha</label>
-                                            <button className="text-[10px] font-bold text-red-500 uppercase hover:underline">Esqueci a senha</button>
+                                            <button type="button" className="text-[10px] font-bold text-red-500 uppercase hover:underline">Esqueci a senha</button>
                                         </div>
                                         <input
                                             type="password"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            required
                                             placeholder="••••••••"
                                             className="w-full bg-gray-50 border-gray-200 rounded-xl py-3 px-4 focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all text-sm outline-none"
                                         />
@@ -210,9 +284,10 @@ export default function MarketplaceLayout({ children }) {
 
                                     <button
                                         type="submit"
-                                        className="mt-4 bg-red-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all active:scale-95 uppercase tracking-widest text-sm"
+                                        disabled={isLoading}
+                                        className="mt-4 bg-red-500 text-white font-bold py-4 rounded-xl shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all active:scale-95 uppercase tracking-widest text-sm disabled:opacity-50"
                                     >
-                                        Login
+                                        {isLoading ? 'Entrando...' : 'Login'}
                                     </button>
                                 </form>
 

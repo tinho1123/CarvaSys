@@ -87,79 +87,89 @@ class ClientSeeder extends Seeder
 
         $companies = [$cantina, $mercado, $farmacia, $bebidos];
 
-        // 2. Criar Clientes
+        // 2. Criar Categoria Globais (Sistema)
+        $cats = [
+            'Alimentos Básicos',
+            'Bebidas Alcoólicas',
+            'Bebidas Não Alcoólicas',
+            'Carnes e Frios',
+            'Hortifruti',
+            'Padaria e Laticínios',
+            'Snacks e Doces',
+            'Higiene Pessoal',
+            'Limpeza e Casa',
+            'Cuidados com a Saúde',
+            'Pet Shop',
+            'Bazar e Papelaria'
+        ];
+
+        $globalCategories = [];
+        foreach ($cats as $catName) {
+            $globalCategories[$catName] = \App\Models\ProductsCategories::updateOrCreate(
+                ['name' => $catName],
+                ['active' => 'Y']
+            );
+        }
+
+        // 3. Criar Cliente Principal (Marketplace / SSO)
         $wellington = Client::updateOrCreate(
             ['document_number' => '13530365700'],
             [
-                'uuid' => Str::uuid(),
+                'uuid' => (string) Str::uuid(),
                 'name' => 'Wellington Carvalho',
-                'email' => 'wellington@teste.com',
+                'email' => 'carvalho.cwell@gmail.com',
                 'password' => Hash::make('Well.10091999'),
                 'document_type' => 'cpf',
-                'active' => true,
+                'active' => true, // Client table uses boolean
             ]
         );
 
-        // 3. Associar Dados por Empresa
+        // 4. Associar Dados por Empresa e Gerar Produtos
         foreach ($companies as $company) {
+            // Vincular o Wellington a todas as empresas para liberar o acesso SSO/Marketplace
             $wellington->companies()->syncWithoutDetaching([$company->id => ['is_active' => true]]);
 
-            // Categorias Diversas
-            $cats = ['Almoço', 'Bebidas', 'Higiene', 'Limpeza', 'Remédios'];
-            foreach ($cats as $catName) {
-                $category = \App\Models\ProductsCategories::create([
-                    'company_id' => $company->id,
-                    'name' => $catName,
-                    'active' => 'Y',
-                ]);
+            foreach ($globalCategories as $catName => $category) {
+                // Evitar duplicação de produtos no re-seed
+                $productCount = \App\Models\Product::where('category_id', $category->id)
+                    ->where('company_id', $company->id)
+                    ->count();
 
-                // Produtos com e sem desconto
-                for ($p = 1; $p <= 3; $p++) {
-                    $amount = rand(10, 150);
-                    $discount = rand(0, 1) ? $amount * 0.1 : 0; // 10% de desconto aleatório
+                if ($productCount === 0) {
+                    for ($p = 1; $p <= 3; $p++) {
+                        $amount = rand(10, 150);
+                        $discount = rand(0, 1) ? $amount * 0.1 : 0;
 
-                    \App\Models\Product::create([
-                        'uuid' => Str::uuid(),
-                        'company_id' => $company->id,
-                        'category_id' => $category->id,
-                        'name' => "Item $p de $catName (" . $company->name . ")",
-                        'description' => "Excelente opção para você e sua família. Qualidade garantida por " . $company->name,
-                        'amount' => $amount,
-                        'discounts' => $discount,
-                        'total_amount' => $amount - $discount,
-                        'quantity' => 100,
-                        'image' => '/demo-product.png',
-                        'active' => 'Y',
-                        'isCool' => ($p % 2 == 0) ? 'Y' : 'N',
-                    ]);
+                        \App\Models\Product::create([
+                            'uuid' => Str::uuid(),
+                            'company_id' => $company->id,
+                            'category_id' => $category->id,
+                            'name' => "Item $p de $catName (" . $company->name . ")",
+                            'description' => "Excelente opção para você e sua família. Qualidade garantida por " . $company->name,
+                            'amount' => $amount,
+                            'discounts' => $discount,
+                            'total_amount' => $amount - $discount,
+                            'quantity' => 100,
+                            'image' => '/demo-product.png',
+                            'active' => 'Y',
+                            'isCool' => ($p % 2 == 0) ? 'Y' : 'N',
+                        ]);
+                    }
                 }
             }
             
-            // Taxa Padrão
-            \App\Models\Fee::create([
-                'uuid' => Str::uuid(),
-                'company_id' => $company->id,
-                'description' => 'Taxa de Serviço',
-                'amount' => 2.50,
-                'type' => 'fixed',
-            ]);
-        }
-        // 4. Criar um segundo cliente para testes gerais
-        $testClient = Client::updateOrCreate(
-            ['document_number' => '12345678901'],
-            [
-                'uuid' => Str::uuid(),
-                'name' => 'Cliente Teste',
-                'email' => 'cliente@teste.com',
-                'password' => Hash::make('password'),
-                'document_type' => 'cpf',
-                'active' => true,
-            ]
-        );
-
-        // Associar o cliente de teste apenas à primeira empresa (entrada direta)
-        if (!empty($companies)) {
-            $testClient->companies()->syncWithoutDetaching([$companies[0]->id => ['is_active' => true]]);
+            // Taxa Padrão por Empresa
+            \App\Models\Fee::updateOrCreate(
+                [
+                    'company_id' => $company->id,
+                    'description' => 'Taxa de Serviço',
+                ],
+                [
+                    'uuid' => Str::uuid(),
+                    'amount' => 2.50,
+                    'type' => 'fixed',
+                ]
+            );
         }
     }
 }

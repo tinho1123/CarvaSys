@@ -10,17 +10,14 @@ class ProductsCategories extends Model
     use HasFactory;
 
     protected $fillable = [
-        'company_id',
+        'name',
         'description',
+        'active',
     ];
 
-    public function company(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(\App\Models\Company::class);
-    }
 
-    public function products(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function products(): \Illuminate\Database\Eloquent\Relations\HasMany
     {
-        return $this->belongsTo(\App\Models\Product::class);
+        return $this->hasMany(\App\Models\Product::class, 'category_id');
     }
 }

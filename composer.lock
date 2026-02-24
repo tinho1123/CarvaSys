@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ca12964511a32fd01e2e1a94fd348d95",
+    "content-hash": "6717a0c865ffbfff36175d3d8c23c969",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -71,6 +71,54 @@
                 "source": "https://github.com/AnourValar/eloquent-serialize/tree/1.3.5"
             },
             "time": "2025-12-04T13:38:21+00:00"
+        },
+        {
+            "name": "bilalbaraz/supabase-laravel",
+            "version": "0.1.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bilalbaraz/supabase-laravel.git",
+                "reference": "161f1cbeb2ea8ced59b7c7947078bf505a52295b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bilalbaraz/supabase-laravel/zipball/161f1cbeb2ea8ced59b7c7947078bf505a52295b",
+                "reference": "161f1cbeb2ea8ced59b7c7947078bf505a52295b",
+                "shasum": ""
+            },
+            "require": {
+                "guzzlehttp/guzzle": "^7.7",
+                "php": "^8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Bilalbaraz\\SupabaseLaravel\\SupabaseServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Bilalbaraz\\SupabaseLaravel\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Bilal Baraz",
+                    "email": "bilalbaraz@windowslive.com"
+                }
+            ],
+            "description": "Wrapper for Supabase",
+            "support": {
+                "issues": "https://github.com/bilalbaraz/supabase-laravel/issues",
+                "source": "https://github.com/bilalbaraz/supabase-laravel/tree/0.1.2"
+            },
+            "time": "2023-08-13T15:47:49+00:00"
         },
         {
             "name": "blade-ui-kit/blade-heroicons",
@@ -10354,5 +10402,5 @@
         "php": "^8.1"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }

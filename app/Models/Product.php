@@ -8,6 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     use HasFactory;
+ 
+    protected static function booted()
+    {
+        static::creating(function ($product) {
+            if (!$product->uuid) {
+                $product->uuid = (string) \Illuminate\Support\Str::uuid();
+            }
+        });
+    }
 
     protected $fillable = [
         'name',
@@ -35,10 +44,6 @@ class Product extends Model
         return $this->belongsTo(\App\Models\ProductsCategories::class, 'category_id');
     }
 
-    public function productsCategories(): \Illuminate\Database\Eloquent\Relations\HasMany
-    {
-        return $this->hasMany(\App\Models\ProductsCategories::class);
-    }
 
     public function transactions(): \Illuminate\Database\Eloquent\Relations\HasMany
     {

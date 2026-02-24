@@ -43,6 +43,7 @@ class AdminPanelProvider extends PanelProvider
             )
             ->brandName('Painel do administrador')
             ->defaultThemeMode(ThemeMode::Dark)
+            ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\\Filament\\Admin\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
             ->pages([
                 Pages\Dashboard::class,

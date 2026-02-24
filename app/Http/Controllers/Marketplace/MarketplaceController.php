@@ -74,4 +74,31 @@ class MarketplaceController extends Controller
             'productsByCategory' => $company->products->groupBy('category.name'),
         ]);
     }
+
+    public function orders()
+    {
+        $orders = Order::where('client_id', auth()->guard('client')->id())
+            ->with(['items', 'company'])
+            ->latest()
+            ->get()
+            ->map(fn($order) => [
+                'uuid' => $order->uuid,
+                'status' => $order->status,
+                'total_amount' => $order->total_amount,
+                'created_at' => $order->created_at->format('d/m/Y H:i'),
+                'company' => [
+                    'name' => $order->company->name,
+                    'logo' => $order->company->logo_path ?? '/default-store-logo.png',
+                ],
+                'items' => $order->items->map(fn($item) => [
+                    'product_name' => $item->product_name,
+                    'quantity' => $item->quantity,
+                    'total_amount' => $item->total_amount,
+                ]),
+            ]);
+
+        return Inertia::render('Marketplace/Orders', [
+            'orders' => $orders,
+        ]);
+    }
 }

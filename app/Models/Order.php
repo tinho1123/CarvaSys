@@ -11,6 +11,12 @@ class Order extends Model
 {
     use HasFactory;
 
+    const STATUS_PENDING = 'pending';
+    const STATUS_PROCESSING = 'processing';
+    const STATUS_SHIPPED = 'shipped';
+    const STATUS_DELIVERED = 'delivered';
+    const STATUS_CANCELLED = 'cancelled';
+
     protected $fillable = [
         'uuid',
         'company_id',
@@ -65,19 +71,19 @@ class Order extends Model
     }
 
     /**
-     * Scope: get pending orders.
+     * Scope: get processing orders.
      */
-    public function scopePending($query)
+    public function scopeProcessing($query)
     {
-        return $query->where('status', 'pending');
+        return $query->where('status', self::STATUS_PROCESSING);
     }
 
     /**
-     * Scope: get confirmed orders.
+     * Scope: get shipped orders.
      */
-    public function scopeConfirmed($query)
+    public function scopeShipped($query)
     {
-        return $query->where('status', 'confirmed');
+        return $query->where('status', self::STATUS_SHIPPED);
     }
 
     /**
@@ -85,7 +91,67 @@ class Order extends Model
      */
     public function scopeDelivered($query)
     {
-        return $query->where('status', 'delivered');
+        return $query->where('status', self::STATUS_DELIVERED);
+    }
+
+    /**
+     * Check if the order can be approved.
+     */
+    public function canBeApproved(): bool
+    {
+        return $this->status === self::STATUS_PENDING;
+    }
+
+    /**
+     * Check if the order can be shipped.
+     */
+    public function canBeShipped(): bool
+    {
+        return $this->status === self::STATUS_PROCESSING;
+    }
+
+    /**
+     * Check if the order can be delivered.
+     */
+    public function canBeDelivered(): bool
+    {
+        return $this->status === self::STATUS_SHIPPED;
+    }
+
+    /**
+     * Approve the order.
+     */
+    public function approve(): void
+    {
+        if ($this->canBeApproved()) {
+            $this->status = self::STATUS_PROCESSING;
+            $this->confirmed_at = now();
+            $this->save();
+        }
+    }
+
+    /**
+     * Ship the order.
+     */
+    public function ship(): void
+    {
+        if ($this->canBeShipped()) {
+            $this->status = self::STATUS_SHIPPED;
+            $this->shipped_at = now();
+            $this->save();
+        }
+    }
+
+    /**
+     * Deliver the order.
+     */
+    public function deliver(): void
+    {
+        if ($this->canBeDelivered()) {
+            $this->status = self::STATUS_DELIVERED;
+            $this->delivered_at = now();
+            $this->save();
+        }
     }
 
     /**
@@ -99,5 +165,10 @@ class Order extends Model
         $this->save();
 
         return $this;
+    }
+
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
     }
 }

@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             'uuid' => Str::uuid(),
             'name' => 'Carvalho Soluções em TI',
             'foundation_date' => '1999-09-10',
+            'active' => 'Y',
         ]);
         $user = User::create([
             'uuid' => Str::uuid(),

@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -35,9 +36,27 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        return [
+        $shared = [
             ...parent::share($request),
-            //
+            'auth' => [
+                'user' => auth()->guard('client')->user(),
+            ],
+            'orders_count' => auth()->guard('client')->check() 
+                ? [
+                    'unfinished' => Order::where('client_id', auth()->guard('client')->id())
+                        ->whereNotIn('status', [Order::STATUS_DELIVERED, Order::STATUS_CANCELLED])
+                        ->count()
+                ] : [
+                    'unfinished' => 0
+                ],
         ];
+
+        \Log::info('Inertia Shared Data:', [
+            'client_logged_in' => auth()->guard('client')->check(),
+            'client_id' => auth()->guard('client')->id(),
+            'url' => $request->fullUrl(),
+        ]);
+
+        return $shared;
     }
 }
