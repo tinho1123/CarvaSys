@@ -4,6 +4,9 @@ namespace Database\Seeders;
 
 use App\Models\Client;
 use App\Models\Company;
+use App\Models\Fee;
+use App\Models\Product;
+use App\Models\ProductsCategories;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -16,7 +19,7 @@ class ClientSeeder extends Seeder
     public function run(): void
     {
         // 1. Atualizar/Criar Parceiros (Companies) com metadados de Marketplace
-        
+
         // Restaurante
         $cantina = Company::updateOrCreate(
             ['name' => 'Cantina do Well'],
@@ -100,12 +103,12 @@ class ClientSeeder extends Seeder
             'Limpeza e Casa',
             'Cuidados com a Saúde',
             'Pet Shop',
-            'Bazar e Papelaria'
+            'Bazar e Papelaria',
         ];
 
         $globalCategories = [];
         foreach ($cats as $catName) {
-            $globalCategories[$catName] = \App\Models\ProductsCategories::updateOrCreate(
+            $globalCategories[$catName] = ProductsCategories::updateOrCreate(
                 ['name' => $catName],
                 ['active' => 'Y']
             );
@@ -131,7 +134,7 @@ class ClientSeeder extends Seeder
 
             foreach ($globalCategories as $catName => $category) {
                 // Evitar duplicação de produtos no re-seed
-                $productCount = \App\Models\Product::where('category_id', $category->id)
+                $productCount = Product::where('category_id', $category->id)
                     ->where('company_id', $company->id)
                     ->count();
 
@@ -140,12 +143,12 @@ class ClientSeeder extends Seeder
                         $amount = rand(10, 150);
                         $discount = rand(0, 1) ? $amount * 0.1 : 0;
 
-                        \App\Models\Product::create([
+                        Product::create([
                             'uuid' => Str::uuid(),
                             'company_id' => $company->id,
                             'category_id' => $category->id,
-                            'name' => "Item $p de $catName (" . $company->name . ")",
-                            'description' => "Excelente opção para você e sua família. Qualidade garantida por " . $company->name,
+                            'name' => "Item $p de $catName (".$company->name.')',
+                            'description' => 'Excelente opção para você e sua família. Qualidade garantida por '.$company->name,
                             'amount' => $amount,
                             'discounts' => $discount,
                             'total_amount' => $amount - $discount,
@@ -157,9 +160,9 @@ class ClientSeeder extends Seeder
                     }
                 }
             }
-            
+
             // Taxa Padrão por Empresa
-            \App\Models\Fee::updateOrCreate(
+            Fee::updateOrCreate(
                 [
                     'company_id' => $company->id,
                     'description' => 'Taxa de Serviço',

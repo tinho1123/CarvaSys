@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Marketplace;
 use App\Http\Controllers\Controller;
 use App\Models\Client;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Str;
+use Inertia\Inertia;
 
 class SSOCallbackController extends Controller
 {
@@ -21,18 +21,19 @@ class SSOCallbackController extends Controller
         $email = $request->input('email');
         $name = $request->input('name');
 
-        if (!$clerkId) {
+        if (! $clerkId) {
             \Log::warning('SSO Callback acessado sem clerk_id');
+
             return redirect()->route('marketplace.index');
         }
 
-        \Log::info('Iniciando sincronização SSO para Clerk ID: ' . $clerkId);
+        \Log::info('Iniciando sincronização SSO para Clerk ID: '.$clerkId);
 
         // 1. Verificar se o cliente já existe pelo clerk_id
         $client = Client::where('clerk_id', $clerkId)->first();
 
         // 2. Se não existir pelo ID, tentar pelo e-mail
-        if (!$client && $email) {
+        if (! $client && $email) {
             $client = Client::where('email', $email)->first();
             if ($client) {
                 \Log::info('Cliente encontrado por e-mail. Vinculando Clerk ID.');
@@ -41,35 +42,37 @@ class SSOCallbackController extends Controller
         }
 
         // 3. Se ainda não existir, criar um registro temporário/novo
-        if (!$client) {
-            \Log::info('Criando novo cliente para Clerk ID: ' . $clerkId);
+        if (! $client) {
+            \Log::info('Criando novo cliente para Clerk ID: '.$clerkId);
             $client = Client::create([
                 'uuid' => (string) Str::uuid(),
                 'clerk_id' => $clerkId,
                 'name' => $name,
                 'email' => $email,
                 'active' => true,
-                'document_type' => 'cpf', 
+                'document_type' => 'cpf',
             ]);
         }
 
         // 4. LOGAR O CLIENTE NO LARAVEL
         auth()->guard('client')->login($client);
-        \Log::info('Cliente autenticado no Laravel: ' . $client->name);
+        \Log::info('Cliente autenticado no Laravel: '.$client->name);
 
         // 5. Verificar se o CPF está preenchido
         if (empty($client->document_number)) {
             \Log::info('Perfil incompleto. Solicitando CPF.');
+
             return response()->json([
                 'status' => 'incomplete_profile',
-                'redirect_url' => route('marketplace.complete-profile')
+                'redirect_url' => route('marketplace.complete-profile'),
             ]);
         }
 
         \Log::info('Perfil completo. Redirecionando para Home.');
+
         return response()->json([
             'status' => 'success',
-            'redirect_url' => route('marketplace.index')
+            'redirect_url' => route('marketplace.index'),
         ]);
     }
 
@@ -86,7 +89,7 @@ class SSOCallbackController extends Controller
         ]);
 
         $client = Client::where('clerk_id', $request->clerk_id)->firstOrFail();
-        
+
         $client->update([
             'document_number' => $request->cpf,
             'active' => true,

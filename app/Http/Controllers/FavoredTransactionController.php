@@ -6,6 +6,7 @@ use App\Models\FavoredTransaction;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class FavoredTransactionController extends Controller
 {
@@ -38,7 +39,7 @@ class FavoredTransactionController extends Controller
             'category_id' => 'nullable|exists:products_categories,id',
         ]);
 
-        $validated['uuid'] = \Illuminate\Support\Str::uuid();
+        $validated['uuid'] = Str::uuid();
         $validated['company_id'] = auth()->user()->companies->first()->id;
         $validated['active'] = true;
         $validated['total_amount'] = $validated['amount'];

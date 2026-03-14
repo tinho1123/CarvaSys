@@ -38,27 +38,27 @@ class Company extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(\App\Models\User::class, 'companies_users');
+        return $this->belongsToMany(User::class, 'companies_users');
     }
 
     public function transactions(): HasMany
     {
-        return $this->hasMany(\App\Models\Transaction::class);
+        return $this->hasMany(Transaction::class);
     }
 
     public function productsCategories(): HasMany
     {
-        return $this->hasMany(\App\Models\ProductsCategories::class);
+        return $this->hasMany(ProductsCategories::class);
     }
 
     public function products(): HasMany
     {
-        return $this->hasMany(\App\Models\Product::class);
+        return $this->hasMany(Product::class);
     }
 
     public function fees(): HasMany
     {
-        return $this->hasMany(\App\Models\Fee::class);
+        return $this->hasMany(Fee::class);
     }
 
     public function getTenantKeyName(): string

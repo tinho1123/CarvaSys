@@ -5,6 +5,7 @@ namespace Tests\Unit\FavoredTransaction;
 use App\Models\Client;
 use App\Models\Company;
 use App\Models\FavoredTransaction;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class FavoredTransactionTest extends TestCase
@@ -25,7 +26,7 @@ class FavoredTransactionTest extends TestCase
     public function it_can_create_favored_transaction_with_minimum_data()
     {
         $transactionData = [
-            'uuid' => \Illuminate\Support\Str::uuid(),
+            'uuid' => Str::uuid(),
             'company_id' => $this->company->id,
             'client_id' => $this->client->id,
             'name' => 'Test Transaction',

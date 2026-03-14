@@ -4,16 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Str;
 
 class Product extends Model
 {
     use HasFactory;
- 
+
     protected static function booted()
     {
         static::creating(function ($product) {
-            if (!$product->uuid) {
-                $product->uuid = (string) \Illuminate\Support\Str::uuid();
+            if (! $product->uuid) {
+                $product->uuid = (string) Str::uuid();
             }
         });
     }
@@ -34,20 +37,19 @@ class Product extends Model
         'uuid',
     ];
 
-    public function company(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function company(): BelongsTo
     {
-        return $this->belongsTo(\App\Models\Company::class);
+        return $this->belongsTo(Company::class);
     }
 
     public function category()
     {
-        return $this->belongsTo(\App\Models\ProductsCategories::class, 'category_id');
+        return $this->belongsTo(ProductsCategories::class, 'category_id');
     }
 
-
-    public function transactions(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function transactions(): HasMany
     {
-        return $this->hasMany(\App\Models\Transaction::class);
+        return $this->hasMany(Transaction::class);
     }
 
     public function getRouteKeyName(): string

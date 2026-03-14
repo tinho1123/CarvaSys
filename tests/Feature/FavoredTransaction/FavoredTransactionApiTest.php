@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\FavoredTransaction;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\Sanctum;
 use Tests\TestCase;
 
@@ -294,7 +295,7 @@ class FavoredTransactionApiTest extends TestCase
     /** @test */
     public function it_handles_transaction_not_found()
     {
-        $nonExistentUuid = \Illuminate\Support\Str::uuid();
+        $nonExistentUuid = Str::uuid();
 
         $response = $this->getJson("/api/favored-transactions/{$nonExistentUuid}");
 
