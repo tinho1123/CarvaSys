@@ -32,10 +32,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP 8.1
+      - name: Setup PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.1"
+          php-version: "8.4"
           extensions: mbstring, pdo, pdo_mysql, xml, ctype, bcmath, tokenizer
           coverage: none
 
@@ -105,10 +105,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP 8.1
+      - name: Setup PHP 8.4
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.1"
+          php-version: "8.4"
           coverage: none
 
       - name: Setup Node.js
