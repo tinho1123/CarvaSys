@@ -1,0 +1,29 @@
+<?php
+
+namespace Database\Factories;
+
+use App\Models\Client;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Hash;
+
+/**
+ * @extends Factory<Client>
+ */
+class ClientFactory extends Factory
+{
+    protected $model = Client::class;
+
+    public function definition(): array
+    {
+        return [
+            'uuid' => $this->faker->uuid(),
+            'name' => $this->faker->name(),
+            'email' => $this->faker->unique()->safeEmail(),
+            'password' => Hash::make('password'),
+            'document_type' => 'cpf',
+            'document_number' => $this->faker->unique()->numerify('###########'),
+            'phone' => $this->faker->phoneNumber(),
+            'active' => true,
+        ];
+    }
+}
