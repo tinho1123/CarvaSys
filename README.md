@@ -1,66 +1,161 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Comere
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+**Plataforma de gestão de crédito B2B para pequenas e médias empresas brasileiras.**
 
-## About Laravel
+O Comere permite que empresas ofereçam crédito (fiado) aos seus clientes, gerenciem pedidos, acompanhem transações e disponibilizem um portal self-service moderno — tudo em uma única plataforma multi-tenant.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Funcionalidades
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- **Gestão de crédito (Fiado)** — controle de saldo devedor, histórico de transações e parcelas
+- **Portal do cliente** — acesso via CPF/CNPJ com autenticação SSO (Clerk)
+- **Catálogo de produtos** — produtos por empresa com categorias, busca e filtros
+- **Gestão de pedidos** — criação, acompanhamento e histórico de pedidos
+- **Notificações** — avisos de pedido, lembretes de pagamento e alertas de crédito
+- **Pagamentos online** — integração com Stripe (PaymentIntent)
+- **Painel administrativo** — interface Filament para gestão completa de cada empresa
 
-## Learning Laravel
+---
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+## Stack
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+| Camada | Tecnologia |
+|---|---|
+| Backend | Laravel 10, PHP 8.4 |
+| Admin | Filament 3.x |
+| API Auth | Laravel Sanctum |
+| Frontend | React 19 + Inertia.js 2 |
+| Estilização | Tailwind CSS v4 + Vite 6 |
+| Auth SSO | Clerk React |
+| Banco de dados | MySQL 8.4 |
+| Cache | Redis |
+| Pagamentos | Stripe |
+| Ambiente Dev | Laravel Sail (Docker) |
+| Testes | PHPUnit 10 |
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## Pré-requisitos
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+- Docker + Docker Compose
+- PHP 8.1+
+- Node.js 18+
+- Composer
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+## Instalação
 
-## Contributing
+```bash
+# 1. Clone o repositório
+git clone <repo-url> comere
+cd comere
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+# 2. Instale as dependências PHP
+composer install
 
-## Code of Conduct
+# 3. Instale as dependências Node
+npm install
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 4. Configure o ambiente
+cp .env.example .env
+php artisan key:generate
 
-## Security Vulnerabilities
+# 5. Suba os containers
+./vendor/bin/sail up -d
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# 6. Execute as migrations e seeds
+./vendor/bin/sail artisan migrate --seed
 
-## License
+# 7. Inicie o frontend
+./vendor/bin/sail npm run dev
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+Acesse em `http://localhost`.
+
+---
+
+## Variáveis de Ambiente
+
+Edite o `.env` com suas credenciais:
+
+```env
+DB_DATABASE=comere
+
+STRIPE_PUBLIC_KEY=pk_...
+STRIPE_SECRET_KEY=sk_...
+
+VITE_CLERK_PUBLISHABLE_KEY=pk_...
+```
+
+---
+
+## Comandos Úteis
+
+```bash
+# Containers
+./vendor/bin/sail up -d          # Subir ambiente
+./vendor/bin/sail down           # Parar ambiente
+./vendor/bin/sail bash           # Acessar shell do container
+
+# Banco de dados
+./vendor/bin/sail artisan migrate
+./vendor/bin/sail artisan migrate:fresh --seed
+
+# Qualidade de código (obrigatório antes de commits)
+./vendor/bin/pint
+
+# Testes
+./vendor/bin/phpunit
+./vendor/bin/phpunit tests/Feature
+./vendor/bin/phpunit tests/Unit
+
+# Frontend
+npm run dev
+npm run build
+```
+
+---
+
+## Arquitetura Multi-Tenant
+
+Cada empresa é um **tenant** isolado. Todas as tabelas possuem `company_id` como chave de escopo — nenhuma query retorna dados entre empresas distintas. Clientes podem pertencer a múltiplas empresas via tabela pivot `client_company`.
+
+---
+
+## Autenticação
+
+| Tipo | Método |
+|---|---|
+| Admin | E-mail e senha (painel Filament) |
+| Cliente (portal) | CPF ou CNPJ |
+| Cliente (SSO) | Clerk JWT |
+| API | Token Sanctum |
+
+---
+
+## Documentação
+
+- [`CLAUDE.md`](./CLAUDE.md) — guia completo para desenvolvimento e convenções
+- [`AGENTS.md`](./AGENTS.md) — padrões de código detalhados
+- [`IMPLEMENTATION.md`](./IMPLEMENTATION.md) — resumo da implementação Phase 1
+- [`docs/PRD-System-Overview.md`](./docs/PRD-System-Overview.md) — visão geral do sistema
+- [`.agent/skills/`](./.agent/skills/) — guias aprofundados por área (Laravel, API, Filament, testes, multi-tenancy)
+
+---
+
+## Status do Projeto
+
+**Phase 1 MVP — ~80% concluído**
+
+- [x] Autenticação multi-company (CPF/CNPJ + SSO)
+- [x] API do portal do cliente (Sanctum)
+- [x] Gestão de pedidos e itens
+- [x] Sistema de notificações
+- [x] Integração Stripe (skeleton)
+- [x] Painel Filament (Clientes, Produtos, Pedidos)
+- [ ] Dashboard React/Inertia (Phase 2)
+- [ ] Webhooks Stripe e reconciliação (Phase 2)
+- [ ] Notificações por e-mail / WhatsApp (Phase 2)
+- [ ] PWA mobile (Phase 2)
