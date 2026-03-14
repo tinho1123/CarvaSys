@@ -41,13 +41,13 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => auth()->guard('client')->user(),
             ],
-            'orders_count' => auth()->guard('client')->check() 
+            'orders_count' => auth()->guard('client')->check()
                 ? [
                     'unfinished' => Order::where('client_id', auth()->guard('client')->id())
                         ->whereNotIn('status', [Order::STATUS_DELIVERED, Order::STATUS_CANCELLED])
-                        ->count()
+                        ->count(),
                 ] : [
-                    'unfinished' => 0
+                    'unfinished' => 0,
                 ],
         ];
 

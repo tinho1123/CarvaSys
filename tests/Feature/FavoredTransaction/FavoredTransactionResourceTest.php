@@ -2,10 +2,14 @@
 
 namespace Tests\Feature\FavoredTransaction;
 
+use App\Filament\Admin\Resources\FavoredTransactionResource\Pages\CreateFavoredTransaction;
+use App\Filament\Admin\Resources\FavoredTransactionResource\Pages\EditFavoredTransaction;
+use App\Filament\Admin\Resources\FavoredTransactionResource\Pages\ListFavoredTransactions;
 use App\Models\Client;
 use App\Models\Company;
 use App\Models\FavoredTransaction;
 use App\Models\User;
+use Filament\Facades\Filament;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -31,12 +35,15 @@ class FavoredTransactionResourceTest extends TestCase
         // Associate user with company
         $this->user->companies()->attach($this->company->id);
         $this->actingAs($this->user);
+
+        // Set Filament tenant context
+        Filament::setTenant($this->company);
     }
 
     /** @test */
     public function it_can_render_favored_transactions_list_page()
     {
-        $response = $this->get("/admin/{$this->company->id}/favored-transactions");
+        $response = $this->get("/admin/{$this->company->uuid}/favored-transactions");
 
         $response->assertOk();
     }
@@ -44,7 +51,7 @@ class FavoredTransactionResourceTest extends TestCase
     /** @test */
     public function it_can_render_favored_transactions_create_page()
     {
-        $response = $this->get("/admin/{$this->company->id}/favored-transactions/create");
+        $response = $this->get("/admin/{$this->company->uuid}/favored-transactions/create");
 
         $response->assertOk();
     }
@@ -57,7 +64,7 @@ class FavoredTransactionResourceTest extends TestCase
             'client_id' => $this->client->id,
         ]);
 
-        $response = $this->get("/admin/{$this->company->id}/favored-transactions/{$transaction->uuid}/edit");
+        $response = $this->get("/admin/{$this->company->uuid}/favored-transactions/{$transaction->uuid}/edit");
 
         $response->assertOk();
     }
@@ -72,7 +79,7 @@ class FavoredTransactionResourceTest extends TestCase
             'favored_total' => 100.00,
         ]);
 
-        Livewire::test(\App\Filament\Resources\FavoredTransactionResource\Pages\ListFavoredTransactions::class)
+        Livewire::test(ListFavoredTransactions::class)
             ->assertTableColumnExists('client.name')
             ->assertTableColumnFormattedStateSet('client.name', $this->client->name, $transaction);
     }
@@ -87,7 +94,7 @@ class FavoredTransactionResourceTest extends TestCase
             'favored_paid_amount' => 30.00,
         ]);
 
-        Livewire::test(\App\Filament\Resources\FavoredTransactionResource\Pages\ListFavoredTransactions::class)
+        Livewire::test(ListFavoredTransactions::class)
             ->assertTableColumnExists('remaining_balance')
             ->assertTableColumnFormattedStateSet('remaining_balance', 70.00, $transaction);
     }
@@ -105,7 +112,7 @@ class FavoredTransactionResourceTest extends TestCase
             'active' => true,
         ];
 
-        Livewire::test(\App\Filament\Resources\FavoredTransactionResource\Pages\CreateFavoredTransaction::class)
+        Livewire::test(CreateFavoredTransaction::class)
             ->fillForm($transactionData)
             ->call('create')
             ->assertHasNoFormErrors();
@@ -121,7 +128,7 @@ class FavoredTransactionResourceTest extends TestCase
     /** @test */
     public function it_validates_required_fields_on_create()
     {
-        Livewire::test(\App\Filament\Resources\FavoredTransactionResource\Pages\CreateFavoredTransaction::class)
+        Livewire::test(CreateFavoredTransaction::class)
             ->call('create')
             ->assertHasFormErrors([
                 'client_id',
@@ -148,7 +155,7 @@ class FavoredTransactionResourceTest extends TestCase
             'favored_paid_amount' => 50.00,
         ];
 
-        Livewire::test(\App\Filament\Resources\FavoredTransactionResource\Pages\EditFavoredTransaction::class, [
+        Livewire::test(EditFavoredTransaction::class, [
             'record' => $transaction->getRouteKey(),
         ])
             ->fillForm($editData)
@@ -170,7 +177,7 @@ class FavoredTransactionResourceTest extends TestCase
             'company_id' => $this->company->id,
         ]);
 
-        Livewire::test(\App\Filament\Resources\FavoredTransactionResource\Pages\ListFavoredTransactions::class)
+        Livewire::test(ListFavoredTransactions::class)
             ->callTableAction('delete', $transaction);
 
         $this->assertModelMissing($transaction);
@@ -192,9 +199,9 @@ class FavoredTransactionResourceTest extends TestCase
             'name' => 'Other Company Transaction',
         ]);
 
-        Livewire::test(\App\Filament\Resources\FavoredTransactionResource\Pages\ListFavoredTransactions::class)
+        Livewire::test(ListFavoredTransactions::class)
             ->assertCanSeeTableRecords([$companyTransaction])
-            ->assertCannotSeeTableRecords([$otherTransaction]);
+            ->assertCanNotSeeTableRecords([$otherTransaction]);
     }
 
     /** @test */
@@ -207,9 +214,9 @@ class FavoredTransactionResourceTest extends TestCase
             'favored_paid_amount' => 789.10,
         ]);
 
-        Livewire::test(\App\Filament\Resources\FavoredTransactionResource\Pages\ListFavoredTransactions::class)
-            ->assertTableColumnFormattedStateSet('favored_total', 'R$1.234,56', $transaction)
-            ->assertTableColumnFormattedStateSet('favored_paid_amount', 'R$789,10', $transaction);
+        Livewire::test(ListFavoredTransactions::class)
+            ->assertTableColumnFormattedStateSet('favored_total', "R\$\xc2\xa01.234,56", $transaction)
+            ->assertTableColumnFormattedStateSet('favored_paid_amount', "R\$\xc2\xa0789,10", $transaction);
     }
 
     /** @test */
@@ -218,13 +225,13 @@ class FavoredTransactionResourceTest extends TestCase
         $client1 = Client::factory()->create(['company_id' => $this->company->id, 'name' => 'João Silva']);
         $client2 = Client::factory()->create(['company_id' => $this->company->id, 'name' => 'Maria Souza']);
 
-        $transaction1 = FavoredTransaction::factory()->create(['client_id' => $client1->id]);
-        $transaction2 = FavoredTransaction::factory()->create(['client_id' => $client2->id]);
+        $transaction1 = FavoredTransaction::factory()->create(['client_id' => $client1->id, 'company_id' => $this->company->id]);
+        $transaction2 = FavoredTransaction::factory()->create(['client_id' => $client2->id, 'company_id' => $this->company->id]);
 
-        Livewire::test(\App\Filament\Resources\FavoredTransactionResource\Pages\ListFavoredTransactions::class)
+        Livewire::test(ListFavoredTransactions::class)
             ->searchTable('João')
             ->assertCanSeeTableRecords([$transaction1])
-            ->assertCannotSeeTableRecords([$transaction2]);
+            ->assertCanNotSeeTableRecords([$transaction2]);
     }
 
     /** @test */
@@ -232,17 +239,19 @@ class FavoredTransactionResourceTest extends TestCase
     {
         $transaction1 = FavoredTransaction::factory()->create([
             'company_id' => $this->company->id,
-            'name' => 'Venda de Produto A',
+            'client_id' => $this->client->id,
+            'name' => 'Venda Especial',
         ]);
 
         $transaction2 = FavoredTransaction::factory()->create([
             'company_id' => $this->company->id,
-            'name' => 'Venda de Produto B',
+            'client_id' => $this->client->id,
+            'name' => 'Venda Normal',
         ]);
 
-        Livewire::test(\App\Filament\Resources\FavoredTransactionResource\Pages\ListFavoredTransactions::class)
-            ->searchTable('Produto A')
+        Livewire::test(ListFavoredTransactions::class)
+            ->searchTable('Especial')
             ->assertCanSeeTableRecords([$transaction1])
-            ->assertCannotSeeTableRecords([$transaction2]);
+            ->assertCanNotSeeTableRecords([$transaction2]);
     }
 }

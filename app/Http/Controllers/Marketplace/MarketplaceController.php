@@ -13,7 +13,7 @@ class MarketplaceController extends Controller
     public function index(Request $request)
     {
         $category = $request->query('category');
-        
+
         $companies = Company::where('active', 'Y')
             ->when($category, function ($query, $category) {
                 return $query->where('type', $category);
@@ -30,7 +30,7 @@ class MarketplaceController extends Controller
                 'is_promoted' => $company->is_promoted,
             ]);
 
-        $promotedProducts = Product::whereHas('company', fn($q) => $q->where('active', 'Y'))
+        $promotedProducts = Product::whereHas('company', fn ($q) => $q->where('active', 'Y'))
             ->where('discounts', '>', 0) // Usando a coluna correta 'discounts'
             ->limit(8)
             ->get();
@@ -38,7 +38,7 @@ class MarketplaceController extends Controller
         $lastVisitedUuids = session()->get('last_visited_stores', []);
         $lastVisited = Company::whereIn('uuid', $lastVisitedUuids)
             ->get()
-            ->sortBy(fn($c) => array_search($c->uuid, $lastVisitedUuids));
+            ->sortBy(fn ($c) => array_search($c->uuid, $lastVisitedUuids));
 
         return Inertia::render('Marketplace/Index', [
             'companies' => $companies,
@@ -58,7 +58,7 @@ class MarketplaceController extends Controller
         $lastVisited = array_slice($lastVisited, 0, 5); // Manter as últimas 5
         session()->put('last_visited_stores', $lastVisited);
 
-        $company->load(['products' => fn($q) => $q->where('active', 'Y')->with('category')]);
+        $company->load(['products' => fn ($q) => $q->where('active', 'Y')->with('category')]);
 
         return Inertia::render('Marketplace/Show', [
             'company' => [
@@ -81,7 +81,7 @@ class MarketplaceController extends Controller
             ->with(['items', 'company'])
             ->latest()
             ->get()
-            ->map(fn($order) => [
+            ->map(fn ($order) => [
                 'uuid' => $order->uuid,
                 'status' => $order->status,
                 'total_amount' => $order->total_amount,
@@ -90,7 +90,7 @@ class MarketplaceController extends Controller
                     'name' => $order->company->name,
                     'logo' => $order->company->logo_path ?? '/default-store-logo.png',
                 ],
-                'items' => $order->items->map(fn($item) => [
+                'items' => $order->items->map(fn ($item) => [
                     'product_name' => $item->product_name,
                     'quantity' => $item->quantity,
                     'total_amount' => $item->total_amount,

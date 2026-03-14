@@ -48,14 +48,14 @@ class ProductResource extends Resource
                             ->prefix('R$')
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, Forms\Set $set, Forms\Get $get) => $set('total_amount', (float)$state - (float)$get('discounts'))),
+                            ->afterStateUpdated(fn ($state, Forms\Set $set, Forms\Get $get) => $set('total_amount', (float) $state - (float) $get('discounts'))),
                         Forms\Components\TextInput::make('discounts')
                             ->label('Descontos')
                             ->numeric()
                             ->default(0)
                             ->prefix('R$')
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn ($state, Forms\Set $set, Forms\Get $get) => $set('total_amount', (float)$get('amount') - (float)$state)),
+                            ->afterStateUpdated(fn ($state, Forms\Set $set, Forms\Get $get) => $set('total_amount', (float) $get('amount') - (float) $state)),
                         Forms\Components\TextInput::make('total_amount')
                             ->label('Preço Final')
                             ->numeric()

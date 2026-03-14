@@ -5,11 +5,15 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
+use Filament\Panel;
 use Filament\Panel\Concerns\HasTenancy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements FilamentUser, HasTenants
@@ -25,6 +29,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         'name',
         'email',
         'password',
+        'uuid',
     ];
 
     /**
@@ -46,9 +51,18 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         'password' => 'hashed',
     ];
 
+    protected static function booted(): void
+    {
+        static::creating(function (User $model) {
+            if (is_null($model->uuid)) {
+                $model->uuid = Str::uuid();
+            }
+        });
+    }
+
     public function company(): BelongsToMany
     {
-        return $this->belongsToMany(\App\Models\Company::class, 'companies_users');
+        return $this->belongsToMany(Company::class, 'companies_users');
     }
 
     public function companies(): BelongsToMany
@@ -56,17 +70,17 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         return $this->company();
     }
 
-    public function getTenants(\Filament\Panel $panel): \Illuminate\Support\Collection
+    public function getTenants(Panel $panel): Collection
     {
         return $this->companies()->get();
     }
 
-    public function canAccessTenant(\Illuminate\Database\Eloquent\Model $tenant): bool
+    public function canAccessTenant(Model $tenant): bool
     {
         return $this->companies()->wherePivot('company_id', $tenant->id)->exists();
     }
 
-    public function canAccessPanel(\Filament\Panel $panel): bool
+    public function canAccessPanel(Panel $panel): bool
     {
         return true;
     }

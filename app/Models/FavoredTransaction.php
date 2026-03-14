@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Str;
 
 class FavoredTransaction extends Model
 {
@@ -43,6 +44,11 @@ class FavoredTransaction extends Model
         'due_date' => 'date',
     ];
 
+    public function client(): BelongsTo
+    {
+        return $this->belongsTo(Client::class);
+    }
+
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class);
@@ -71,6 +77,10 @@ class FavoredTransaction extends Model
     protected static function booted(): void
     {
         static::creating(function (FavoredTransaction $model) {
+            if (is_null($model->uuid)) {
+                $model->uuid = Str::uuid();
+            }
+
             // If amount or total_amount are not provided, default them
             // to the favored_total when available, or to 0.
             if (is_null($model->amount)) {

@@ -2,10 +2,13 @@
 
 namespace Database\Factories;
 
+use App\Models\Client;
+use App\Models\Company;
+use App\Models\FavoredTransaction;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\FavoredTransaction>
+ * @extends Factory<FavoredTransaction>
  */
 class FavoredTransactionFactory extends Factory
 {
@@ -18,8 +21,8 @@ class FavoredTransactionFactory extends Factory
     {
         return [
             'uuid' => $this->faker->uuid(),
-            'company_id' => \App\Models\Company::factory(),
-            'client_id' => \App\Models\Client::factory(),
+            'company_id' => Company::factory(),
+            'client_id' => Client::factory(),
             'name' => $this->faker->name(),
             'description' => $this->faker->optional()->text(),
             'amount' => $this->faker->randomFloat(2, 1, 500),

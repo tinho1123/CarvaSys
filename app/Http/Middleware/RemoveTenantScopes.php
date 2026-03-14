@@ -2,6 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\FavoredTransaction;
+use App\Models\Fee;
+use App\Models\Notification;
+use App\Models\Product;
+use App\Models\ProductsCategories;
+use App\Models\Transaction;
 use Closure;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,12 +25,12 @@ class RemoveTenantScopes
         // registry and unsetting the specific 'company' key per model.
 
         $models = [
-            \App\Models\Transaction::class,
-            \App\Models\FavoredTransaction::class,
-            \App\Models\Product::class,
-            \App\Models\ProductsCategories::class,
-            \App\Models\Fee::class,
-            \App\Models\Notification::class,
+            Transaction::class,
+            FavoredTransaction::class,
+            Product::class,
+            ProductsCategories::class,
+            Fee::class,
+            Notification::class,
         ];
 
         foreach ($models as $model) {

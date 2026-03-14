@@ -2,6 +2,8 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\RemoveTenantScopes;
+use App\Models\Company;
 use Filament\Enums\ThemeMode;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -37,7 +39,7 @@ class AdminPanelProvider extends PanelProvider
                 'warning' => Color::Orange,
             ])
             ->tenant(
-                model: \App\Models\Company::class,
+                model: Company::class,
                 slugAttribute: 'uuid',
                 ownershipRelationship: 'company'
             )
@@ -62,7 +64,7 @@ class AdminPanelProvider extends PanelProvider
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
-                \App\Http\Middleware\RemoveTenantScopes::class,
+                RemoveTenantScopes::class,
             ])
             ->authMiddleware([
                 Authenticate::class,

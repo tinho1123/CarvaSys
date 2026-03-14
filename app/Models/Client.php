@@ -3,13 +3,16 @@
 namespace App\Models;
 
 use Filament\Models\Contracts\FilamentUser;
+use Filament\Models\Contracts\HasTenants;
+use Filament\Panel;
 use Filament\Panel\Concerns\HasTenancy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as AuthenticatableUser;
 use Illuminate\Support\Collection;
 
-class Client extends AuthenticatableUser implements \Filament\Models\Contracts\HasTenants, FilamentUser
+class Client extends AuthenticatableUser implements FilamentUser, HasTenants
 {
     use HasFactory, HasTenancy;
 
@@ -60,7 +63,7 @@ class Client extends AuthenticatableUser implements \Filament\Models\Contracts\H
     /**
      * Implementação de HasTenants para Filament
      */
-    public function getTenants(\Filament\Panel $panel): Collection
+    public function getTenants(Panel $panel): Collection
     {
         return $this->companies()->get();
     }
@@ -68,7 +71,7 @@ class Client extends AuthenticatableUser implements \Filament\Models\Contracts\H
     /**
      * Verificar se o cliente pode acessar um tenant específico
      */
-    public function canAccessTenant(\Illuminate\Database\Eloquent\Model $tenant): bool
+    public function canAccessTenant(Model $tenant): bool
     {
         return $this->companies()
             ->where('companies.id', $tenant->id)
@@ -78,7 +81,7 @@ class Client extends AuthenticatableUser implements \Filament\Models\Contracts\H
     /**
      * Verificar se o cliente pode acessar o painel Filament
      */
-    public function canAccessPanel(\Filament\Panel $panel): bool
+    public function canAccessPanel(Panel $panel): bool
     {
         return $panel->getId() === 'client' && $this->active;
     }

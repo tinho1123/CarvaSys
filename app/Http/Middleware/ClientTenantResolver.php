@@ -2,6 +2,14 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\Company;
+use App\Models\FavoredDebt;
+use App\Models\FavoredTransaction;
+use App\Models\Fee;
+use App\Models\Order;
+use App\Models\Product;
+use App\Models\ProductsCategories;
+use App\Models\Transaction;
 use Closure;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -32,7 +40,7 @@ class ClientTenantResolver
         $client = Auth::guard('client')->user();
 
         // Encontrar a empresa pelo UUID
-        $company = \App\Models\Company::where('uuid', $tenantUuid)
+        $company = Company::where('uuid', $tenantUuid)
             ->orWhere('id', $tenantUuid)
             ->first();
 
@@ -68,31 +76,31 @@ class ClientTenantResolver
     private function applyTenantScopes($company): void
     {
         // Aplicar scope de company em models relevantes
-        \App\Models\Transaction::addGlobalScope('company', function ($query) use ($company) {
+        Transaction::addGlobalScope('company', function ($query) use ($company) {
             $query->where('company_id', $company->id);
         });
 
-        \App\Models\FavoredTransaction::addGlobalScope('company', function ($query) use ($company) {
+        FavoredTransaction::addGlobalScope('company', function ($query) use ($company) {
             $query->where('company_id', $company->id);
         });
 
-        \App\Models\FavoredDebt::addGlobalScope('company', function ($query) use ($company) {
+        FavoredDebt::addGlobalScope('company', function ($query) use ($company) {
             $query->where('company_id', $company->id);
         });
 
-        \App\Models\Product::addGlobalScope('company', function ($query) use ($company) {
+        Product::addGlobalScope('company', function ($query) use ($company) {
             $query->where('company_id', $company->id);
         });
 
-        \App\Models\ProductsCategories::addGlobalScope('company', function ($query) use ($company) {
+        ProductsCategories::addGlobalScope('company', function ($query) use ($company) {
             $query->where('company_id', $company->id);
         });
 
-        \App\Models\Fee::addGlobalScope('company', function ($query) use ($company) {
+        Fee::addGlobalScope('company', function ($query) use ($company) {
             $query->where('company_id', $company->id);
         });
 
-        \App\Models\Order::addGlobalScope('company', function ($query) use ($company) {
+        Order::addGlobalScope('company', function ($query) use ($company) {
             $query->where('company_id', $company->id);
         });
     }

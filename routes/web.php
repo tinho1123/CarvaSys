@@ -2,8 +2,7 @@
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
-use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\Marketplace\MarketplaceController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -15,9 +14,9 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-use App\Http\Controllers\Marketplace\MarketplaceController;
-use App\Http\Controllers\Marketplace\SSOCallbackController;
 use App\Http\Controllers\Marketplace\MarketplaceLoginController;
+use App\Http\Controllers\Marketplace\SSOCallbackController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', [MarketplaceController::class, 'index'])->name('marketplace.index');
 Route::get('/store/{company:uuid}', [MarketplaceController::class, 'show'])->name('marketplace.show');
@@ -26,7 +25,9 @@ Route::post('/marketplace/login', [MarketplaceLoginController::class, 'login'])-
 Route::post('/marketplace/logout', [MarketplaceLoginController::class, 'logout'])->name('marketplace.logout');
 
 // Fluxo SSO e Cadastro Completo
-Route::get('/sso-callback', function() { return redirect()->route('marketplace.index'); });
+Route::get('/sso-callback', function () {
+    return redirect()->route('marketplace.index');
+});
 Route::post('/sso-callback', SSOCallbackController::class)->name('marketplace.sso-callback');
 Route::get('/complete-profile', [SSOCallbackController::class, 'completeProfile'])->name('marketplace.complete-profile');
 Route::post('/complete-profile', [SSOCallbackController::class, 'storeProfile'])->name('marketplace.store-profile');
@@ -34,7 +35,6 @@ Route::post('/complete-profile', [SSOCallbackController::class, 'storeProfile'])
 Route::middleware('auth:client')->group(function () {
     Route::get('/meus-pedidos', [MarketplaceController::class, 'orders'])->name('marketplace.orders');
 });
-
 
 // Rotas do Admin (existente)
 Route::get('/login', [LoginController::class, 'index'])->middleware('guest');
