@@ -29,14 +29,15 @@ class FavoredTransactionApiTest extends TestCase
         $this->company = Company::factory()->create();
         $this->client = Client::factory()->create(['company_id' => $this->company->id]);
 
-        // Associate user with company and create token
+        // Associate user with company
         $this->user->companies()->attach($this->company->id);
-        Sanctum::actingAs($this->user);
     }
 
     /** @test */
     public function it_can_list_favored_transactions()
     {
+        Sanctum::actingAs($this->user);
+
         FavoredTransaction::factory()->count(3)->create([
             'company_id' => $this->company->id,
             'client_id' => $this->client->id,
@@ -68,6 +69,8 @@ class FavoredTransactionApiTest extends TestCase
     /** @test */
     public function it_can_list_favored_transactions_for_specific_client()
     {
+        Sanctum::actingAs($this->user);
+
         $client1 = Client::factory()->create(['company_id' => $this->company->id]);
         $client2 = Client::factory()->create(['company_id' => $this->company->id]);
 
@@ -84,6 +87,8 @@ class FavoredTransactionApiTest extends TestCase
     /** @test */
     public function it_can_create_favored_transaction()
     {
+        Sanctum::actingAs($this->user);
+
         $transactionData = [
             'client_id' => $this->client->id,
             'name' => 'Test API Transaction',
@@ -110,6 +115,8 @@ class FavoredTransactionApiTest extends TestCase
     /** @test */
     public function it_validates_required_fields_on_create()
     {
+        Sanctum::actingAs($this->user);
+
         $response = $this->postJson('/api/favored-transactions', []);
 
         $response->assertUnprocessable()
@@ -124,6 +131,8 @@ class FavoredTransactionApiTest extends TestCase
     /** @test */
     public function it_validates_client_exists_on_create()
     {
+        Sanctum::actingAs($this->user);
+
         $response = $this->postJson('/api/favored-transactions', [
             'client_id' => 999999,
             'name' => 'Test Transaction',
@@ -138,6 +147,8 @@ class FavoredTransactionApiTest extends TestCase
     /** @test */
     public function it_can_update_favored_transaction()
     {
+        Sanctum::actingAs($this->user);
+
         $transaction = FavoredTransaction::factory()->create([
             'company_id' => $this->company->id,
             'client_id' => $this->client->id,
@@ -167,6 +178,8 @@ class FavoredTransactionApiTest extends TestCase
     /** @test */
     public function it_can_delete_favored_transaction()
     {
+        Sanctum::actingAs($this->user);
+
         $transaction = FavoredTransaction::factory()->create([
             'company_id' => $this->company->id,
         ]);
@@ -186,6 +199,8 @@ class FavoredTransactionApiTest extends TestCase
     /** @test */
     public function it_can_register_payment()
     {
+        Sanctum::actingAs($this->user);
+
         $transaction = FavoredTransaction::factory()->create([
             'company_id' => $this->company->id,
             'favored_total' => 100.00,
@@ -213,6 +228,8 @@ class FavoredTransactionApiTest extends TestCase
     /** @test */
     public function it_validates_payment_amount_does_not_exceed_balance()
     {
+        Sanctum::actingAs($this->user);
+
         $transaction = FavoredTransaction::factory()->create([
             'company_id' => $this->company->id,
             'favored_total' => 100.00,
@@ -232,17 +249,21 @@ class FavoredTransactionApiTest extends TestCase
     /** @test */
     public function it_can_list_clients_with_transactions()
     {
+        Sanctum::actingAs($this->user);
+
         $client1 = Client::factory()->create(['company_id' => $this->company->id]);
         $client2 = Client::factory()->create(['company_id' => $this->company->id]);
 
         FavoredTransaction::factory()->count(2)->create([
             'client_id' => $client1->id,
+            'company_id' => $this->company->id,
             'favored_total' => 100.00,
             'favored_paid_amount' => 20.00,
         ]);
 
         FavoredTransaction::factory()->count(1)->create([
             'client_id' => $client2->id,
+            'company_id' => $this->company->id,
             'favored_total' => 50.00,
             'favored_paid_amount' => 50.00,
         ]);
@@ -295,6 +316,8 @@ class FavoredTransactionApiTest extends TestCase
     /** @test */
     public function it_handles_transaction_not_found()
     {
+        Sanctum::actingAs($this->user);
+
         $nonExistentUuid = Str::uuid();
 
         $response = $this->getJson("/api/favored-transactions/{$nonExistentUuid}");

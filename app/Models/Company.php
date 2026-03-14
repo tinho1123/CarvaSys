@@ -61,6 +61,11 @@ class Company extends Model
         return $this->hasMany(Fee::class);
     }
 
+    public function favoredTransactions(): HasMany
+    {
+        return $this->hasMany(FavoredTransaction::class);
+    }
+
     public function getTenantKeyName(): string
     {
         return 'id';

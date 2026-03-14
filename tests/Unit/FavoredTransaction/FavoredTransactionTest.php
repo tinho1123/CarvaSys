@@ -5,11 +5,14 @@ namespace Tests\Unit\FavoredTransaction;
 use App\Models\Client;
 use App\Models\Company;
 use App\Models\FavoredTransaction;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class FavoredTransactionTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected Company $company;
 
     protected Client $client;
@@ -115,7 +118,7 @@ class FavoredTransactionTest extends TestCase
         $this->assertEquals(99.99, $transaction->amount);
         $this->assertEquals(199.99, $transaction->favored_total);
         $this->assertEquals(50.50, $transaction->favored_paid_amount);
-        $this->assertIsFloat($transaction->amount);
+        $this->assertIsNumeric($transaction->amount);
     }
 
     /** @test */

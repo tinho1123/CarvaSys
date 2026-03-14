@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements FilamentUser, HasTenants
@@ -28,6 +29,7 @@ class User extends Authenticatable implements FilamentUser, HasTenants
         'name',
         'email',
         'password',
+        'uuid',
     ];
 
     /**
@@ -48,6 +50,15 @@ class User extends Authenticatable implements FilamentUser, HasTenants
     protected $casts = [
         'password' => 'hashed',
     ];
+
+    protected static function booted(): void
+    {
+        static::creating(function (User $model) {
+            if (is_null($model->uuid)) {
+                $model->uuid = Str::uuid();
+            }
+        });
+    }
 
     public function company(): BelongsToMany
     {

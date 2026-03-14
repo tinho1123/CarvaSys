@@ -3,12 +3,15 @@
 namespace Tests\Unit;
 
 use App\Models\User;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Tests\TestCase;
 
 class UserLoginTest extends TestCase
 {
+    use RefreshDatabase;
+
     /**
      * Test user model can be created with minimum data
      */
