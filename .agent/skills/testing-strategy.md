@@ -1,11 +1,11 @@
 ---
 name: Testing Strategy with PHPUnit
-description: Comprehensive testing guidelines for CarvaSys using PHPUnit with unit and feature tests
+description: Comprehensive testing guidelines for Comere using PHPUnit with unit and feature tests
 ---
 
 # Testing Strategy with PHPUnit
 
-This skill covers testing strategies for CarvaSys using PHPUnit 10.x with Laravel's testing utilities.
+This skill covers testing strategies for Comere using PHPUnit 10.x with Laravel's testing utilities.
 
 ## Testing Philosophy
 

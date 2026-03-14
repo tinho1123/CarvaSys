@@ -1,15 +1,15 @@
 ---
 name: Multi-Tenant Development
-description: Patterns and best practices for multi-tenant development in CarvaSys with company_id isolation
+description: Patterns and best practices for multi-tenant development in Comere with company_id isolation
 ---
 
 # Multi-Tenant Development
 
-This skill covers multi-tenancy patterns used in CarvaSys, including tenant isolation, scoping, and security best practices.
+This skill covers multi-tenancy patterns used in Comere, including tenant isolation, scoping, and security best practices.
 
 ## Multi-Tenancy Architecture
 
-CarvaSys uses **database-level multi-tenancy** with `company_id` isolation. All tenant-scoped data is stored in the same database but filtered by `company_id`.
+Comere uses **database-level multi-tenancy** with `company_id` isolation. All tenant-scoped data is stored in the same database but filtered by `company_id`.
 
 ### Key Concepts
 

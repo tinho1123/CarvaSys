@@ -85,7 +85,7 @@ export default function MarketplaceLayout({ children }) {
     return (
         <div className="min-h-screen bg-gray-50 font-sans text-gray-900 overflow-x-hidden">
             <Head>
-                <title>CarvaSys Marketplace</title>
+                <title>Comere Marketplace</title>
                 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
             </Head>
 
@@ -314,7 +314,7 @@ export default function MarketplaceLayout({ children }) {
             <footer className="bg-white border-t border-gray-100 mt-12 py-8">
                 <div className="max-w-7xl mx-auto px-4 text-center">
                     <p className="text-sm text-gray-500 italic">
-                        © 2026 CarvaSys - O seu marketplace de confiança
+                        © 2026 Comere - O seu marketplace de confiança
                     </p>
                 </div>
             </footer>

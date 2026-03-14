@@ -1,4 +1,4 @@
-# Análise Completa do Código CarvaSys
+# Análise Completa do Código Comere
 
 **Data:** 4 de Fevereiro de 2026  
 **Versão:** 1.0  
@@ -8,7 +8,7 @@
 
 ## 1. Visão Geral do Sistema
 
-**CarvaSys** é um sistema de gestão de crédito (fiado) B2B multi-tenant desenvolvido em Laravel 10 com Filament 3 e React 19. O sistema permite que empresas ofereçam crédito a seus clientes, rastreiem transações e gerenciem pagamentos através de um portal moderno.
+**Comere** é um sistema de gestão de crédito (fiado) B2B multi-tenant desenvolvido em Laravel 10 com Filament 3 e React 19. O sistema permite que empresas ofereçam crédito a seus clientes, rastreiem transações e gerenciem pagamentos através de um portal moderno.
 
 ### Tecnologias Principais
 
@@ -26,7 +26,7 @@
 ## 2. Estrutura de Diretórios
 
 ```
-/home/wellington/projects/CarvaSys/
+/home/wellington/projects/Comere/
 ├── app/
 │   ├── Auth/                    # Autenticação customizada
 │   ├── Console/                 # Comandos Artisan
@@ -556,7 +556,7 @@ tests/
 
 ## 14. Conclusão
 
-O CarvaSys é um sistema bem estruturado com arquitetura multi-tenant sólida. A implementação atual (Phase 1 - 80%) cobre os módulos essenciais:
+O Comere é um sistema bem estruturado com arquitetura multi-tenant sólida. A implementação atual (Phase 1 - 80%) cobre os módulos essenciais:
 
 **Pontos Fortes:**
 - ✅ Arquitetura multi-tenant robusta

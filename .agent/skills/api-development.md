@@ -1,11 +1,11 @@
 ---
 name: API Development with Sanctum
-description: Guidelines for building RESTful APIs with Laravel Sanctum authentication in CarvaSys
+description: Guidelines for building RESTful APIs with Laravel Sanctum authentication in Comere
 ---
 
 # API Development with Sanctum
 
-This skill covers building RESTful APIs with Laravel Sanctum for the CarvaSys client portal.
+This skill covers building RESTful APIs with Laravel Sanctum for the Comere client portal.
 
 ## API Structure
 
@@ -200,7 +200,7 @@ public function login(Request $request): JsonResponse
 # Client request with token
 curl -H "Authorization: Bearer {token}" \
      -H "Content-Type: application/json" \
-     https://api.carvasys.com/api/client/products
+     https://api.comere.com/api/client/products
 ```
 
 ### Token Revocation

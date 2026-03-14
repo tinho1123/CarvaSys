@@ -21,7 +21,7 @@ export default function CompleteProfile() {
 
     return (
         <MarketplaceLayout>
-            <Head title="Completar Cadastro - CarvaSys" />
+            <Head title="Completar Cadastro - Comere" />
 
             <div className="max-w-md mx-auto mt-12 mb-20 bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
                 <div className="bg-gradient-to-r from-red-600 to-red-500 p-8 text-white text-center">

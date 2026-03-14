@@ -1,11 +1,11 @@
 ---
-name: Laravel Development with CarvaSys Patterns
-description: Guidelines for developing Laravel applications following CarvaSys project standards and best practices
+name: Laravel Development with Comere Patterns
+description: Guidelines for developing Laravel applications following Comere project standards and best practices
 ---
 
-# Laravel Development with CarvaSys Patterns
+# Laravel Development with Comere Patterns
 
-This skill provides comprehensive guidelines for developing Laravel applications following the CarvaSys project's established patterns, conventions, and best practices.
+This skill provides comprehensive guidelines for developing Laravel applications following the Comere project's established patterns, conventions, and best practices.
 
 ## Technology Stack
 

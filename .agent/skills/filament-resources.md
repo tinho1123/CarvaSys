@@ -1,11 +1,11 @@
 ---
 name: Filament Resource Development
-description: Guidelines for creating and managing Filament 3.x resources in CarvaSys multi-tenant admin panel
+description: Guidelines for creating and managing Filament 3.x resources in Comere multi-tenant admin panel
 ---
 
 # Filament Resource Development
 
-This skill provides guidelines for creating Filament 3.x resources following CarvaSys patterns for multi-tenant administration.
+This skill provides guidelines for creating Filament 3.x resources following Comere patterns for multi-tenant administration.
 
 ## Resource Structure
 

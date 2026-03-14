@@ -1,4 +1,4 @@
-# AGENTS.md - CarvaSys Development Guidelines
+# AGENTS.md - Comere Development Guidelines
 
 ## Project Stack
 - **Backend**: Laravel 10, PHP 8.1+, Filament 3.x, Laravel Sanctum

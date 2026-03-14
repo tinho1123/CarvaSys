@@ -9,7 +9,7 @@
 
 ## 1. Module Overview
 
-The Core Models module defines the fundamental data structures and business logic for the CarvaSys platform. These models represent the primary entities and their relationships in the multi-tenant system.
+The Core Models module defines the fundamental data structures and business logic for the Comere platform. These models represent the primary entities and their relationships in the multi-tenant system.
 
 ### Core Entities
 - **Client** - End users who purchase on credit
