@@ -1,0 +1,160 @@
+name: CI — Lint, Testes e Deploy
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  # ─────────────────────────────────────────────
+  # JOB 1 — PHP: Lint (Pint) + Testes (PHPUnit)
+  # ─────────────────────────────────────────────
+  php:
+    name: PHP — Lint & Testes
+    runs-on: ubuntu-latest
+
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: password
+          MYSQL_DATABASE: comere
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          extensions: mbstring, pdo, pdo_mysql, xml, ctype, bcmath, tokenizer
+          coverage: none
+
+      - name: Cache Composer
+        uses: actions/cache@v4
+        with:
+          path: vendor
+          key: composer-${{ hashFiles('composer.json') }}
+          restore-keys: composer-
+
+      - name: Gerar composer.lock e instalar dependências PHP
+        run: composer update --no-interaction --prefer-dist --optimize-autoloader
+
+      - name: Configurar ambiente de testes
+        run: |
+          cp .env.example .env
+          php artisan key:generate
+          sed -i 's/DB_HOST=127.0.0.1/DB_HOST=127.0.0.1/' .env
+          sed -i 's/DB_DATABASE=.*/DB_DATABASE=comere/' .env
+          sed -i 's/DB_USERNAME=.*/DB_USERNAME=root/' .env
+          sed -i 's/DB_PASSWORD=.*/DB_PASSWORD=password/' .env
+
+      - name: Executar migrations
+        run: php artisan migrate --force
+
+      - name: Lint — Laravel Pint
+        run: ./vendor/bin/pint --test
+
+      - name: Testes — PHPUnit
+        run: ./vendor/bin/phpunit --stop-on-failure
+
+  # ─────────────────────────────────────────────
+  # JOB 2 — Frontend: Build (Vite)
+  # ─────────────────────────────────────────────
+  frontend:
+    name: Frontend — Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Instalar dependências Node
+        run: npm ci
+
+      - name: Build Vite
+        run: npm run build
+
+  # ─────────────────────────────────────────────
+  # JOB 3 — Deploy Hostinger (SSH)
+  # Executa apenas no push para main/master,
+  # após PHP e Frontend passarem.
+  # ─────────────────────────────────────────────
+  deploy:
+    name: Deploy — Hostinger
+    runs-on: ubuntu-latest
+    needs: [php, frontend]
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP 8.4
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.4"
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Gerar composer.lock e instalar dependências PHP (produção)
+        run: composer update --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+      - name: Instalar dependências Node
+        run: npm ci
+
+      - name: Build assets de produção
+        run: npm run build
+
+      - name: Deploy via SSH para Hostinger
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            set -e
+            cd ${{ secrets.DEPLOY_PATH }}
+
+            echo "→ Atualizando código..."
+            git pull origin ${{ github.ref_name }}
+
+            echo "→ Instalando dependências PHP..."
+            composer install --no-interaction --prefer-dist --optimize-autoloader --no-dev
+
+            echo "→ Executando migrations..."
+            php artisan migrate --force
+
+            echo "→ Limpando caches..."
+            php artisan config:clear
+            php artisan cache:clear
+            php artisan route:clear
+            php artisan view:clear
+
+            echo "→ Otimizando para produção..."
+            php artisan config:cache
+            php artisan route:cache
+            php artisan view:cache
+
+            echo "✓ Deploy concluído!"
