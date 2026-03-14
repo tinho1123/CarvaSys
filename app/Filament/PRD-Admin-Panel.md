@@ -418,7 +418,7 @@ public function canAccessTenant(Model $tenant): bool
 
 ### Branding
 ```php
-->brandName('CarvaSys')
+->brandName('Comere')
 ->brandLogo(asset('images/logo.png'))
 ->brandLogoHeight('2rem')
 ->favicon(asset('images/favicon.png'))

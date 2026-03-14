@@ -33,7 +33,7 @@ class PaymentController extends Controller
             $paymentIntent = PaymentIntent::create([
                 'amount' => intval($request->get('amount') * 100), // Convert to cents
                 'currency' => 'brl',
-                'description' => $request->get('description') ?? "Payment for CarvaSys - {$company->name}",
+                'description' => $request->get('description') ?? "Payment for Comere - {$company->name}",
                 'metadata' => [
                     'company_id' => $company->id,
                     'client_user_id' => $clientUser->id,

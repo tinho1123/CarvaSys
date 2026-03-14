@@ -1,4 +1,4 @@
-# PRD: CarvaSys - System Overview
+# PRD: Comere - System Overview
 
 **Version:** 1.0  
 **Last Updated:** February 4, 2026  
@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-**CarvaSys** is a multi-tenant B2B credit management system (fiado/installment payment system) designed for small to medium businesses in Brazil. The platform enables companies to offer credit to their clients, track transactions, manage payments, and provide a modern digital experience through a client portal.
+**Comere** is a multi-tenant B2B credit management system (fiado/installment payment system) designed for small to medium businesses in Brazil. The platform enables companies to offer credit to their clients, track transactions, manage payments, and provide a modern digital experience through a client portal.
 
 ### Key Value Propositions
 

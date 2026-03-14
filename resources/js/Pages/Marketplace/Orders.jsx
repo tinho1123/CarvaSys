@@ -15,7 +15,7 @@ const statusConfig = {
 export default function Orders({ orders }) {
     return (
         <MarketplaceLayout>
-            <Head title="Meus Pedidos - CarvaSys" />
+            <Head title="Meus Pedidos - Comere" />
 
             <div className="max-w-4xl mx-auto">
                 <header className="mb-8">

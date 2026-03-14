@@ -1,8 +1,8 @@
-# CLAUDE.md - CarvaSys AI Assistant Guide
+# CLAUDE.md - Comere AI Assistant Guide
 
 ## Project Overview
 
-**CarvaSys** is a multi-tenant B2B credit management SaaS (fiado/installment system) targeting small-to-medium Brazilian businesses. Companies use it to offer credit to their clients, track transactions, manage orders, and provide a self-service client portal.
+**Comere** is a multi-tenant B2B credit management SaaS (fiado/installment system) targeting small-to-medium Brazilian businesses. Companies use it to offer credit to their clients, track transactions, manage orders, and provide a self-service client portal.
 
 **Phase 1 MVP status:** ~80% complete (as of Feb 2026)
 
@@ -339,7 +339,7 @@ HTTP status codes: `200`, `201`, `400`, `401`, `403`, `404`, `422`, `500`, `502`
 
 ```env
 DB_CONNECTION=mysql
-DB_DATABASE=carvasys
+DB_DATABASE=comere
 
 STRIPE_PUBLIC_KEY=
 STRIPE_SECRET_KEY=

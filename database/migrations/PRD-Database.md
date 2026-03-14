@@ -9,7 +9,7 @@
 
 ## 1. Overview
 
-This document defines the database schema for CarvaSys, including all tables, relationships, indexes, and constraints. The schema supports multi-tenancy with `company_id` isolation.
+This document defines the database schema for Comere, including all tables, relationships, indexes, and constraints. The schema supports multi-tenancy with `company_id` isolation.
 
 ### Database Technology
 - **RDBMS:** MySQL 8.0+ / MariaDB 10.6+

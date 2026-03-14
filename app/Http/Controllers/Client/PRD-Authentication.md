@@ -9,7 +9,7 @@
 
 ## 1. Module Overview
 
-The Authentication & Multi-Tenancy module handles client login, company selection, and tenant resolution for the CarvaSys platform. It supports N:N client-company relationships, allowing a single client to access multiple companies.
+The Authentication & Multi-Tenancy module handles client login, company selection, and tenant resolution for the Comere platform. It supports N:N client-company relationships, allowing a single client to access multiple companies.
 
 ### Key Features
 - CPF/CNPJ-based authentication (Brazilian tax IDs)
