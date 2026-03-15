@@ -126,6 +126,16 @@ jobs:
       - name: Build assets de produção
         run: npm run build
 
+      - name: Upload assets para Hostinger
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          port: ${{ secrets.SSH_PORT }}
+          username: ${{ secrets.SSH_USER }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          source: "public/build/"
+          target: ${{ secrets.DEPLOY_PATH }}
+
       - name: Deploy via SSH para Hostinger
         uses: appleboy/ssh-action@v1.2.0
         with:
