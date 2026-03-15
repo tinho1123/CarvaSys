@@ -19,6 +19,7 @@ class CreateCompany extends CreateRecord
         $company = Company::create([
             'uuid' => Str::uuid(),
             'name' => $data['name'],
+            'foundation_date' => now()->toDateString(),
             'active' => true,
         ]);
 

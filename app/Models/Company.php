@@ -33,6 +33,7 @@ class Company extends Model
     protected $casts = [
         'foundation_date' => 'date',
         'rating' => 'decimal:1',
+        'active' => 'boolean',
         'is_promoted' => 'boolean',
     ];
 

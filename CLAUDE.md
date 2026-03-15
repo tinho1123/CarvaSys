@@ -4,7 +4,7 @@
 
 **Comere** is a multi-tenant B2B credit management SaaS (fiado/installment system) targeting small-to-medium Brazilian businesses. Companies use it to offer credit to their clients, track transactions, manage orders, and provide a self-service client portal.
 
-**Phase 1 MVP status:** ~80% complete (as of Feb 2026)
+**Phase 1 MVP status:** ~80% complete (as of Mar 2026)
 
 ---
 
@@ -12,15 +12,17 @@
 
 | Layer | Technology |
 |---|---|
-| Backend | Laravel 10, PHP 8.1+ (8.4+ in Sail) |
-| Admin Panel | Filament 3.x |
-| API Auth | Laravel Sanctum |
+| Backend | Laravel 10, PHP 8.4 (Sail) |
+| Admin Panel | Filament 3.3 |
+| API Auth | Laravel Sanctum 3.3 |
 | Frontend | React 19.x + Inertia.js 2.x |
 | Styling | Tailwind CSS v4 + Vite 6.x |
+| Animations | Framer Motion 12.x |
+| Icons | Lucide React |
 | Client Auth | Clerk React (SSO) |
 | Database | MySQL 8.4 (Eloquent ORM) |
 | Cache | Redis |
-| Payments | Stripe |
+| Payments | Stripe (`stripe/stripe-php ^10.0`) |
 | Dev Env | Laravel Sail (Docker) |
 | Testing | PHPUnit 10.x |
 | Formatter | Laravel Pint |
@@ -31,14 +33,34 @@
 
 ```
 app/
-├── Filament/Admin/Resources/   # Admin panel resources (Clients, Products, Orders)
+├── Filament/
+│   ├── Admin/Resources/        # Tenant-aware admin panel (/admin)
+│   │   ├── ClientResource/
+│   │   ├── FavoredTransactionResource/
+│   │   ├── OrderResource/
+│   │   └── ProductResource/
+│   ├── Master/Resources/       # Super-admin panel (/master)
+│   │   └── CompanyResource/
+│   ├── Pages/
+│   ├── Resources/
+│   └── Widgets/
 ├── Http/
 │   ├── Controllers/
 │   │   ├── Api/Client/         # Sanctum-protected client portal API (5 controllers)
+│   │   │   ├── CreditController
+│   │   │   ├── NotificationController
+│   │   │   ├── OrderController
+│   │   │   ├── PaymentController
+│   │   │   └── ProductController
+│   │   ├── Auth/               # Admin login/logout
 │   │   └── Marketplace/        # Public marketplace + SSO controllers
-│   └── Middleware/             # 12 middleware classes (tenant, auth, lockout, etc.)
+│   └── Middleware/             # 12 middleware classes
 ├── Models/                     # 13 Eloquent models
-└── Providers/                  # Service providers
+└── Providers/
+    ├── Filament/
+    │   ├── AdminPanelProvider.php   # path: /admin, id: admin
+    │   └── MasterPanelProvider.php  # path: /master, id: master
+    └── ...
 
 routes/
 ├── web.php                     # Marketplace, SSO, admin login routes
@@ -46,16 +68,22 @@ routes/
 └── api_favored.php             # Fiado/credit transaction API routes
 
 resources/
-├── js/                         # React pages + Inertia entry (app.jsx)
+├── js/
+│   ├── Pages/
+│   │   └── Marketplace/        # Index, Show, Orders, CompleteProfile
+│   ├── Layouts/
+│   │   └── MarketplaceLayout.jsx
+│   ├── app.jsx                 # Inertia.js entry point
+│   └── bootstrap.js            # Axios setup
 └── views/                      # Blade templates
 
 database/
-├── migrations/                 # 20 migration files
+├── migrations/                 # 21 migration files
 ├── seeders/
 └── factories/
 
 docs/                           # PRD documents
-.agent/skills/                  # Extended AI skill guides (Laravel, API, Filament, etc.)
+.agent/skills/                  # Extended AI skill guides
 ```
 
 ---
@@ -123,8 +151,25 @@ php artisan config:clear && php artisan cache:clear && php artisan route:clear &
 - All queries must be filtered by `company_id` — never return data across tenants
 - Current company context: `auth()->user()->companies->first()->id`
 - Models auto-set `company_id` in the `boot()` method
-- Filament routes include `{tenant}` (company UUID) parameter
+- Filament Admin routes include `{tenant}` (company UUID) parameter
 - Client-company relationship uses the `client_company` pivot table (`client_id`, `company_id`, `is_active`)
+- `products_categories` is **global** (not tenant-scoped) — no `company_id`
+
+---
+
+## Filament Panels
+
+### Admin Panel (`/admin`)
+- **Provider:** `AdminPanelProvider` — id: `admin`, path: `/admin`
+- **Tenant-aware:** Company (slug: uuid), dark theme, Rose/Indigo colors
+- **Resources:** `ClientResource`, `ProductResource`, `OrderResource`, `FavoredTransactionResource`
+
+### Master Panel (`/master`)
+- **Provider:** `MasterPanelProvider` — id: `master`, path: `/master`
+- **Access:** Only users with `is_master = true`
+- **No tenant scope** — manages all companies globally
+- **Resources:** `CompanyResource` (create/list companies, creates admin user on company creation)
+- **Colors:** Violet
 
 ---
 
@@ -192,6 +237,7 @@ Schema::create('table_name', function (Blueprint $table) {
 - Axios with async/await for HTTP calls
 - Tailwind CSS v4 utility classes for all styling
 - Inertia.js for server-side routing integration
+- Framer Motion for animations
 
 ---
 
@@ -199,27 +245,47 @@ Schema::create('table_name', function (Blueprint $table) {
 
 | User Type | Method | Guard |
 |---|---|---|
-| Admin | Email/password | `auth` (web guard) |
+| Master Admin | Email/password + `is_master=true` | `auth` (web guard) |
+| Company Admin | Email/password | `auth` (web guard) |
 | Client (portal) | CPF/CNPJ | `auth:client` guard |
 | Client (SSO) | Clerk JWT | SSO callback |
 | API | Sanctum tokens | `auth:sanctum` |
 
-- Account lockout: 5 failed attempts → 30-minute lock
+- Account lockout: 5 failed attempts → 30-minute lock (Client model)
 - Session-based tenant tracking via `selected_tenant_id`
+- `is_master` boolean on `users` table gates access to `/master` panel
 
 ---
 
 ## API Endpoints (Client Portal — `auth:sanctum`)
 
 ```
-GET  /api/client/companies/{company}/products           # Product listing
-GET  /api/client/companies/{company}/orders             # Order history
-POST /api/client/companies/{company}/orders             # Create order
+# Products
+GET  /api/client/companies/{company}/products
+GET  /api/client/companies/{company}/products/{product}
+GET  /api/client/companies/{company}/categories
+
+# Orders
+GET  /api/client/companies/{company}/orders
+GET  /api/client/companies/{company}/orders/{order}
+POST /api/client/companies/{company}/orders
+
+# Credit
 GET  /api/client/companies/{company}/client/credit-balance
 GET  /api/client/companies/{company}/client/transaction-history
-GET  /api/client/notifications                          # All notifications
-POST /api/client/companies/{company}/payments/create-intent  # Stripe
+GET  /api/client/companies/{company}/client/upcoming-payments
+
+# Payments (Stripe)
+POST /api/client/companies/{company}/payments/create-intent
 POST /api/client/companies/{company}/payments/confirm
+GET  /api/client/companies/{company}/payments
+
+# Notifications
+GET  /api/client/notifications
+GET  /api/client/notifications/{notification}
+POST /api/client/notifications/{notification}/read
+POST /api/client/notifications/mark-all-read
+GET  /api/client/notifications/unread-count
 ```
 
 ---
@@ -233,31 +299,59 @@ POST /marketplace/login             # Client CPF/CNPJ login
 POST /marketplace/logout
 POST /sso-callback                  # Clerk SSO
 GET  /complete-profile              # Profile completion
-GET  /meus-pedidos                  # My orders (auth:client)
+POST /complete-profile
+GET  /meus-pedidos                  # My orders [auth:client]
 GET  /login                         # Admin login
 POST /login
+POST /logout
 ```
 
 ---
 
 ## Core Models
 
-| Model | Key Relationships |
-|---|---|
-| `Company` | hasMany Users, belongsToMany Clients, hasMany Products/Orders/Transactions |
-| `Client` | belongsToMany Companies (via `client_company`), hasMany Orders/Notifications |
-| `User` | belongsToMany Companies (via `companies_users`) |
-| `Product` | belongsTo Company, belongsTo ProductsCategories |
-| `Order` | belongsTo Company, belongsTo Client, hasMany OrderItems |
-| `OrderItem` | belongsTo Order, belongsTo Product |
-| `Transaction` | belongsTo Company |
-| `FavoredTransaction` | belongsTo Company, has `order_id`, `due_date`, `metadata` |
-| `FavoredDebt` | Debt tracking |
-| `Notification` | Types: `order_update`, `payment_reminder`, `credit_warning`, `announcement` |
-| `Fee` | belongsTo Company |
+| Model | Key Relationships | Notable Fields |
+|---|---|---|
+| `Company` | belongsToMany Users, hasMany Products/Orders/Transactions/Fees/FavoredTransactions | uuid, metadata (JSON), active |
+| `User` | belongsToMany Companies (`companies_users` pivot) | uuid, is_master (boolean) |
+| `Client` | belongsToMany Companies (`client_company` pivot), hasMany Orders/Notifications | uuid, document_type, document_number, clerk_id, locked_until |
+| `Product` | belongsTo Company, belongsTo ProductsCategories, hasMany Transactions | uuid, is_for_favored, favored_price, isCool |
+| `ProductsCategories` | hasMany Products | Global — no company_id |
+| `Order` | belongsTo Company, belongsTo Client, hasMany OrderItems | uuid, status, subtotal/discount/fee/total |
+| `OrderItem` | belongsTo Order, belongsTo Product | uuid, unit_price, discount_percent |
+| `Transaction` | belongsTo Company, belongsTo Product, belongsTo Fee | uuid, type, payment_method |
+| `FavoredTransaction` | belongsTo Company/Client/Order/Product | uuid, due_date, favored_total, favored_paid_amount |
+| `FavoredDebt` | belongsTo Company | amount, due_date, status |
+| `Fee` | belongsTo Company, hasMany Transactions | uuid, type, amount |
+| `Notification` | belongsTo Company | uuid, client_user_id, type, read_at |
+| `CompaniesUsers` | Pivot: belongsTo User, belongsTo Company | user_id, company_id |
 
 ### Order Status Flow
-`pending → confirmed → processing → shipped → delivered` (cancellation supported)
+`pending → processing → shipped → delivered` (cancellation supported at any stage)
+
+### Notification Types
+`order_update` · `payment_reminder` · `credit_warning` · `announcement`
+
+---
+
+## Database Tables (21 migrations)
+
+| Table | Tenant-scoped |
+|---|---|
+| users | No |
+| companies | No |
+| companies_users | No (pivot) |
+| clients | No |
+| client_company | No (pivot) |
+| products_categories | No (global) |
+| products | Yes (`company_id`) |
+| fees | Yes (`company_id`) |
+| transactions | Yes (`company_id`) |
+| favored_transactions | Yes (`company_id`) |
+| favored_debts | Yes (`company_id`) |
+| orders | Yes (`company_id`) |
+| order_items | No (scoped via order) |
+| notifications | Yes (`company_id`) |
 
 ---
 
@@ -312,16 +406,6 @@ HTTP status codes: `200`, `201`, `400`, `401`, `403`, `404`, `422`, `500`, `502`
 
 ---
 
-## Filament Admin Panel
-
-- Resources: `ClientResource`, `ProductResource`, `OrderResource`
-- Tenant-aware: company scoping applied automatically
-- Dark theme by default
-- Custom middleware stack applies to Filament routes
-- Navigation icons use `heroicon-o-*` prefix
-
----
-
 ## Docker Compose Services
 
 | Service | Purpose |
@@ -338,6 +422,11 @@ HTTP status codes: `200`, `201`, `400`, `401`, `403`, `404`, `422`, `500`, `502`
 ## Environment Variables (Key ones)
 
 ```env
+APP_NAME=Laravel
+APP_ENV=local
+APP_DEBUG=true
+APP_URL=http://localhost
+
 DB_CONNECTION=mysql
 DB_DATABASE=comere
 
@@ -348,6 +437,7 @@ VITE_CLERK_PUBLISHABLE_KEY=   # Client SSO
 
 CACHE_DRIVER=file             # Use redis in production
 SESSION_DRIVER=file           # Use redis in production
+QUEUE_CONNECTION=sync
 ```
 
 ---
