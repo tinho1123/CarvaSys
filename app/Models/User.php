@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasTenants;
 use Filament\Panel;
@@ -20,35 +19,22 @@ class User extends Authenticatable implements FilamentUser, HasTenants
 {
     use HasApiTokens, HasFactory, HasTenancy, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
         'uuid',
+        'is_master',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'password' => 'hashed',
+        'is_master' => 'boolean',
     ];
 
     protected static function booted(): void
@@ -58,6 +44,11 @@ class User extends Authenticatable implements FilamentUser, HasTenants
                 $model->uuid = Str::uuid();
             }
         });
+    }
+
+    public function isMaster(): bool
+    {
+        return (bool) $this->is_master;
     }
 
     public function company(): BelongsToMany
@@ -72,11 +63,19 @@ class User extends Authenticatable implements FilamentUser, HasTenants
 
     public function getTenants(Panel $panel): Collection
     {
+        if ($this->isMaster()) {
+            return Company::all();
+        }
+
         return $this->companies()->get();
     }
 
     public function canAccessTenant(Model $tenant): bool
     {
+        if ($this->isMaster()) {
+            return true;
+        }
+
         return $this->companies()->wherePivot('company_id', $tenant->id)->exists();
     }
 
