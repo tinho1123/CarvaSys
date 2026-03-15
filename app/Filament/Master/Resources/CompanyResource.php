@@ -1,18 +1,15 @@
 <?php
 
-namespace App\Filament\Admin\Resources;
+namespace App\Filament\Master\Resources;
 
-use App\Filament\Admin\Resources\CompanyResource\Pages;
+use App\Filament\Master\Resources\CompanyResource\Pages;
 use App\Models\Company;
-use App\Models\User;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class CompanyResource extends Resource
 {
@@ -25,13 +22,6 @@ class CompanyResource extends Resource
     protected static ?string $modelLabel = 'Loja';
 
     protected static ?string $pluralModelLabel = 'Lojas';
-
-    protected static ?string $navigationGroup = 'Master';
-
-    public static function canAccess(): bool
-    {
-        return auth()->user()?->isMaster() ?? false;
-    }
 
     public static function form(Form $form): Form
     {

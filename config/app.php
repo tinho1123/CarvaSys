@@ -4,6 +4,7 @@ use App\Providers\AppServiceProvider;
 use App\Providers\AuthServiceProvider;
 use App\Providers\EventServiceProvider;
 use App\Providers\Filament\AdminPanelProvider;
+use App\Providers\Filament\MasterPanelProvider;
 use App\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\ServiceProvider;
@@ -173,6 +174,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         EventServiceProvider::class,
         AdminPanelProvider::class,
+        MasterPanelProvider::class,
         RouteServiceProvider::class,
     ])->toArray(),
 
