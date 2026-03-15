@@ -20,7 +20,7 @@ class CreateCompany extends CreateRecord
             'uuid' => Str::uuid(),
             'name' => $data['name'],
             'foundation_date' => now()->toDateString(),
-            'active' => 'Y',
+            'active' => true,
         ]);
 
         $user = User::create([
