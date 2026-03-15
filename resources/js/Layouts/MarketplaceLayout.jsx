@@ -47,8 +47,7 @@ export default function MarketplaceLayout({ children }) {
                         <div className="flex items-center gap-8">
                             <Link href="/" className="flex-shrink-0 flex items-center gap-2">
                                 <span className="text-2xl font-bold bg-gradient-to-r from-red-600 to-red-500 bg-clip-text text-transparent italic">
-                                    Carva
-                                    <span className="text-gray-900 not-italic">Sys</span>
+                                    Comere
                                 </span>
                             </Link>
 
