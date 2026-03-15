@@ -18,9 +18,6 @@ jobs:
         with:
           php-version: '8.4'
 
-      - name: Install Composer dependencies
-        run: composer update --no-dev --optimize-autoloader --no-interaction
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -40,7 +37,7 @@ jobs:
           port: ${{ secrets.SSH_PORT }}
           username: ${{ secrets.SSH_USER }}
           password: ${{ secrets.SSH_PASSWORD }}
-          source: "app/,bootstrap/,config/,database/,lang/,public/,resources/,routes/,storage/,vendor/,artisan,composer.json,composer.lock"
+          source: "app/,bootstrap/,config/,database/,lang/,public/,resources/,routes/,storage/,artisan,composer.json,composer.lock"
           target: "/home/u968588512/domains/comere.com.br/comere/"
 
       - name: Run post-deploy commands
@@ -52,6 +49,11 @@ jobs:
           password: ${{ secrets.SSH_PASSWORD }}
           script: |
             cd ~/domains/comere.com.br/comere
+
+            echo "→ Instalando dependências PHP..."
+            composer install --no-dev --optimize-autoloader --no-interaction
+
+            echo "→ Executando migrations..."
             php artisan migrate --force
             php artisan config:cache
             php artisan route:cache
