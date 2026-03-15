@@ -1,14 +1,10 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Head, useForm } from '@inertiajs/react';
 import MarketplaceLayout from '@/Layouts/MarketplaceLayout';
 import { ShieldCheck, UserCheck, AlertCircle } from 'lucide-react';
-import { useUser } from '@clerk/clerk-react';
-
 export default function CompleteProfile() {
-    const { user } = useUser();
     const { data, setData, post, processing, errors } = useForm({
         cpf: '',
-        clerk_id: user?.id || '',
     });
 
     const [agreed, setAgreed] = useState(false);
@@ -30,7 +26,7 @@ export default function CompleteProfile() {
                     </div>
                     <h1 className="text-2xl font-bold">Falta pouco!</h1>
                     <p className="text-red-50 text-sm mt-2">
-                        Olá {user?.firstName}, precisamos apenas do seu CPF para validar sua identidade.
+                        Precisamos apenas do seu CPF para validar sua identidade.
                     </p>
                 </div>
 
